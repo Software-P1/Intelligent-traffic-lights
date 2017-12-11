@@ -38,9 +38,9 @@ typedef struct trafficLight_s{
 
 /* Struct of an individual */
 typedef struct neuron_s{
-    char neuronID[3];
     double weightToNext[MAX_NEURON_IN_LAYER];
-    double inputValue; /* For use in first row */
+    double value;
+    double sumOfPrev;
 } neuron_t;
 
 /* The neural network struct */
@@ -56,10 +56,12 @@ void fillTrafficLight(trafficLight_t* trafficLightToBeFilled, road_t* rLeftRight
 void spawnCars(road_t* roadToSpawnCarsOn);
 void printVisualization(trafficLight_t* trafficLight, int i);
 void removeCars(road_t* road1, road_t* road2);
-void trafficLightLogic(trafficLight_t* trafficLight);
+void trafficLightLogic(trafficLight_t* trafficLight, neuralNetwork_t* theNeuralNetwork);
 void fillNeuralNetwork(neuralNetwork_t* neuralNetworkToBeFilled, int bFromFile);
 double randomDecimal();
-double sigmoid(double x);
+void sigmoid(double* x);
+int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTrafficLight);
+double neuronWeightedValue(neuron_t neuron, int idInNext);
 
 /* The main function */
 int main(void) {
@@ -99,7 +101,7 @@ int main(void) {
         spawnCars(&rDownUp);
 
         /* Run the traffic light logic */
-        trafficLightLogic(&trafficLight);
+        trafficLightLogic(&trafficLight, &theNeuralNetwork);
 
         /* Remove cars this tick */
         if (trafficLight.bVertical == 1){
@@ -199,7 +201,10 @@ void removeCars(road_t* road1, road_t* road2){
 }
 
 /* Traffic light logic */
-void trafficLightLogic(trafficLight_t* trafficLight){
+void trafficLightLogic(trafficLight_t* trafficLight, neuralNetwork_t* theNeuralNetwork){
+    trafficLight->bVertical = runNeuralNetwork(theNeuralNetwork, trafficLight);
+
+    printf("Neural %d\n", trafficLight->bVertical);
     /*
     THINGS TO LOOK INTO:
     Maybe having weights in each direction, removing less and less each time?
@@ -221,8 +226,10 @@ void trafficLightLogic(trafficLight_t* trafficLight){
 void fillNeuralNetwork(neuralNetwork_t* neuralNetworkToBeFilled, int bFromFile){
     int i = 0, n = 0;
 
+    /* Look if they shall be randomly generated or 1read from file */
     if (bFromFile == 0){
-        /* Start layer: Randomize inital weights and bias */
+        printf("[Randomizing neural network weights]\n");
+        /* Start layer: Randomize inital weights */
         for (i = 0; i < NUM_NEURON_LAYER_START; i++) {
             for (n = 0; n < NUM_NEURON_LAYER_1; n++) {
                 neuralNetworkToBeFilled->startLayer[i].weightToNext[n] = randomDecimal();
@@ -245,10 +252,94 @@ double randomDecimal(){
   return (double)(rand() % (10000 + 1 - (-10000)) + (-10000))/10000;
 }
 
-/* Normalizes a number between ~-14 & ~14 to a number between -1 & 1 */
+/* Normalizes a number x, to a number between 0 & 1 */
 /* More info: https://en.wikipedia.org/wiki/Sigmoid_function */
-double sigmoid(double x){
+void sigmoid(double* x){
     double euler = 0;
     euler = EULER;
-    return 1/(1+(pow(euler,(-x))));
+    *x = 1/(1+(pow(euler,(-*x))));
+    return;
+}
+
+/* Runs the neural network. Returns 0 or 1 depending on which direction needs to be green */
+/* Error return value == -1 */
+/* [0] = vert (return 0) | [1] = hori (return 1) */
+int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTrafficLight){
+    int i = 0, n = 0;
+
+    /* Fill and normalize input values */
+    /* First four will be filled with (amountOfCars / 10) */
+    /* Last will be filled with current direction: vert == -1 | hori == 1 */
+    for (i = 0; i < NUM_NEURON_LAYER_START; i++) {
+        switch (i) {
+        case 0:
+            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rUpDown->amountOfCars)/10;
+            break;
+        case 1:
+            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rDownUp->amountOfCars)/10;
+            break;
+        case 2:
+            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rLeftRight->amountOfCars)/10;
+            break;
+        case 3:
+            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rRightLeft->amountOfCars)/10;
+            break;
+        case 4:
+            theNeuralNetwork->startLayer[i].value = (((double)(theTrafficLight->bVertical)) == 1) ? 1.0 : -1.0;
+            break;
+        default:
+            printf("ERROR - ran too many times in start set input value of neurons!\n");
+            break;
+        }
+    }
+
+    /* Run loop for the first layer */
+    for (i = 0; i < NUM_NEURON_LAYER_1; i++) {
+        /* First null the sumOfPrev */
+        theNeuralNetwork->firstLayer[i].sumOfPrev = 0;
+
+        /* Sum the values of each previous neuron (input) * their weight to this neuron */
+        for (n = 0; n < NUM_NEURON_LAYER_START; n++) {
+            theNeuralNetwork->firstLayer[i].sumOfPrev += neuronWeightedValue(theNeuralNetwork->startLayer[n], i);
+        }
+
+        /* Squish sum into 0 to 1 range using sigmoid function */
+        sigmoid(&theNeuralNetwork->firstLayer[i].sumOfPrev);
+
+        /* Set value to sum */
+        theNeuralNetwork->firstLayer[i].value = theNeuralNetwork->firstLayer[i].sumOfPrev;
+    }
+
+    /* Loop for each output */
+    for (i = 0; i < NUM_NEURON_LAYER_END; i++) {
+        /* First null the sumOfPrev */
+        theNeuralNetwork->endLayer[i].sumOfPrev = 0;
+
+        /* Sum the values of each previous neuron (layer 1) * their weight to this neuron */
+        for (n = 0; n < NUM_NEURON_LAYER_1; n++) {
+            theNeuralNetwork->endLayer[i].sumOfPrev += neuronWeightedValue(theNeuralNetwork->firstLayer[n], i);
+        }
+
+        /* Squish sum into 0 to 1 range using sigmoid function */
+        sigmoid(&theNeuralNetwork->endLayer[i].sumOfPrev);
+
+        /* Set value to sum */
+        theNeuralNetwork->endLayer[i].value = theNeuralNetwork->endLayer[i].sumOfPrev;
+
+        printf("END VALUE: %lf\n", theNeuralNetwork->endLayer[i].value);
+    }
+
+    if (theNeuralNetwork->endLayer[0].value > theNeuralNetwork->endLayer[1].value){
+        return 0;
+    } else if (theNeuralNetwork->endLayer[0].value == theNeuralNetwork->endLayer[1].value){
+        printf("EQUAL RESULT IN NEURAL, returned 0\n");
+        return 0;
+    } else if (theNeuralNetwork->endLayer[0].value < theNeuralNetwork->endLayer[1].value){
+        return 1;
+    } else return -1;
+}
+
+/* Returns the weighted value of a given neuron */
+double neuronWeightedValue(neuron_t neuron, int idInNext){
+    return (neuron.value * neuron.weightToNext[idInNext]);
 }
