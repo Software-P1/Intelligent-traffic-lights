@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 /* General simulation defines */
 #define SEED 10
@@ -82,7 +81,7 @@ int main(void) {
             trafficLight.rRightLeft->waitTime++;
             trafficLight.rLeftRight->waitTime++;
         } else if (trafficLight.bVertical == -1 || trafficLight.bVertical == -2){
-
+        /* Intentiually left blank */
         } else {
             printf("ERROR - bVertical is a wrong value!!!\n");
         }
@@ -141,16 +140,16 @@ void spawnCars(road_t* roadToSpawnCarsOn){
 
 /* Print a visualization of the road */
 void printVisualization(trafficLight_t* trafficLight, int i){
-    printf("========== TICK %d ==========\n", i);
-    printf("   |     |     |       \n");
-    printf("___| %-4d|     |_______\n", trafficLight->rUpDown->amountOfCars);
-    printf("                 %-4d  \n", trafficLight->rRightLeft->amountOfCars);
-    printf("---      %s      ------\n", (trafficLight->bVertical == 2) ? "_" : "|");
-    printf(" %-4d                  \n", trafficLight->rLeftRight->amountOfCars);
-    printf("___             _______\n");
-    printf("   |     | %-4d |      \n", trafficLight->rDownUp->amountOfCars);
-    printf("   |     |      |      \n");
-    printf("==============================\n");
+    printf("========= TICK %-4d =========\n", i);
+    printf("       |     |     |         \n");
+    printf("_______| %-4d|     |_______  \n", trafficLight->rUpDown->amountOfCars);
+    printf("                     %-4d    \n", trafficLight->rRightLeft->amountOfCars);
+    printf("-------      %s      ------- \n", (trafficLight->bVertical < 0) ? "X" : (trafficLight->bVertical == 2) ? "_" : "|");
+    printf(" %-4d                        \n", trafficLight->rLeftRight->amountOfCars);
+    printf("_______             _______  \n");
+    printf("       |     | %-4d|         \n", trafficLight->rDownUp->amountOfCars);
+    printf("       |     |     |         \n");
+    printf("=============================\n");
     return;
 }
 
