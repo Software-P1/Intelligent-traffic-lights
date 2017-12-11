@@ -47,7 +47,7 @@ int main(void) {
 
     /* Fill traffic light & initialize direction */
     fillTrafficLight(&trafficLight, &rLeftRight, &rRightLeft, &rUpDown, &rDownUp);
-    trafficLight.bVertical = 0;
+    trafficLight.bVertical = 1;
 
     /* Ask user for input */
     do{
@@ -73,14 +73,16 @@ int main(void) {
         trafficLightLogic(&trafficLight, &timer);
 
         /* Remove cars this tick */
-        if (trafficLight.bVertical == 1){
+        if (trafficLight.bVertical == 2){
             removeCars(trafficLight.rRightLeft, trafficLight.rLeftRight);
             trafficLight.rUpDown->waitTime++;
             trafficLight.rDownUp->waitTime++;
-        } else if (trafficLight.bVertical == 0) {
+        } else if (trafficLight.bVertical == 1) {
             removeCars(trafficLight.rUpDown, trafficLight.rDownUp);
             trafficLight.rRightLeft->waitTime++;
             trafficLight.rLeftRight->waitTime++;
+        } else if (trafficLight.bVertical == -1 || trafficLight.bVertical == -2){
+
         } else {
             printf("ERROR - bVertical is a wrong value!!!\n");
         }
@@ -143,7 +145,7 @@ void printVisualization(trafficLight_t* trafficLight, int i){
     printf("   |     |     |       \n");
     printf("___| %-4d|     |_______\n", trafficLight->rUpDown->amountOfCars);
     printf("                 %-4d  \n", trafficLight->rRightLeft->amountOfCars);
-    printf("---      %s      ------\n", (trafficLight->bVertical == 1) ? "_" : "|");
+    printf("---      %s      ------\n", (trafficLight->bVertical == 2) ? "_" : "|");
     printf(" %-4d                  \n", trafficLight->rLeftRight->amountOfCars);
     printf("___             _______\n");
     printf("   |     | %-4d |      \n", trafficLight->rDownUp->amountOfCars);
@@ -174,8 +176,23 @@ void trafficLightLogic(trafficLight_t* trafficLight, int *timer){
     if (*timer > 0){
         *timer = *timer - 1;
     } else {
-        trafficLight->bVertical = (trafficLight->bVertical) ? 0 : 1;
-        *timer = 3;
+        switch (trafficLight->bVertical) {
+            case -2:
+                trafficLight->bVertical = 1;
+                *timer = 3;
+                break;
+            case -1:
+                trafficLight->bVertical = 2;
+                *timer = 3;
+                break;
+            case 1:
+                trafficLight->bVertical = -1;
+                break;
+            case 2:
+                trafficLight->bVertical = -2;
+                break;
+        }
     }
+
     return;
 }
