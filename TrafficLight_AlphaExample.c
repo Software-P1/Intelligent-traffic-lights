@@ -3,11 +3,10 @@
 
 /* General simulation defines */
 #define SEED 10
-#define AMOUNT_OF_CARS_PASS_PER_TICK 3
-#define PERCENT_3_CAR_SPAWN 1
-#define PERCENT_2_CAR_SPAWN 2
-#define PERCENT_1_CAR_SPAWN 3
-
+#define AMOUNT_OF_CARS_PASS_PER_TICK 3 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
+#define PERCENT_3_CAR_SPAWN 1 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
+#define PERCENT_2_CAR_SPAWN 2 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
+#define PERCENT_1_CAR_SPAWN 3 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
 
 /* Struct pr. road placement */
 typedef struct road_s{
@@ -24,15 +23,14 @@ typedef struct trafficLight_s{
     road_t* rDownUp;
 } trafficLight_t;
 
-
 /* Top-down programming declaration of functions */
 void fillTrafficLight(trafficLight_t* trafficLightToBeFilled, road_t* rLeftRight,
                       road_t* rRightLeft, road_t* rUpDown, road_t* rDownUp);
-void spawnCars(road_t* roadToSpawnCarsOn);
+void legacySpawnCars(road_t* roadTolegacySpawnCarsOn);
 void printVisualization(trafficLight_t* trafficLight, int i);
 void removeCars(road_t* road1, road_t* road2);
 void trafficLightLogic(trafficLight_t* trafficLight, int *timer);
-
+void spawnCars(road_t* roadToSpawnOn);
 
 /* The main function */
 int main(void) {
@@ -62,11 +60,12 @@ int main(void) {
 
     /* The loop for each tick */
     for (i = 0; i < desiredTicks; i++) {
+        /* !!! PLEASE NOTICE THAT IT IS NOW USING LEGACY METHOD UNTIL WE CHANGE INT SECOND PER TICK !!! */
         /* Spawn cars on each road */
-        spawnCars(&rUpDown);
-        spawnCars(&rRightLeft);
-        spawnCars(&rLeftRight);
-        spawnCars(&rDownUp);
+        legacySpawnCars(&rUpDown);
+        legacySpawnCars(&rRightLeft);
+        legacySpawnCars(&rLeftRight);
+        legacySpawnCars(&rDownUp);
 
         /* Run the traffic light logic */
         trafficLightLogic(&trafficLight, &timer);
@@ -117,7 +116,7 @@ void fillTrafficLight(trafficLight_t* trafficLightToBeFilled, road_t* rLeftRight
 }
 
 /* Spawns cars on a single road */
-void spawnCars(road_t* roadToSpawnCarsOn){
+void legacySpawnCars(road_t* roadTolegacySpawnCarsOn){
     int randomNumber = 0;
 
     /* Get random number */
@@ -125,15 +124,15 @@ void spawnCars(road_t* roadToSpawnCarsOn){
 
     /* The 3% += PERCENT_1_CAR_SPAWN */
     if (randomNumber >= 0 && randomNumber <= 3){
-        roadToSpawnCarsOn->amountOfCars += PERCENT_1_CAR_SPAWN;
+        roadTolegacySpawnCarsOn->amountOfCars += PERCENT_1_CAR_SPAWN;
     }
     /* The 2% += PERCENT_2_CAR_SPAWN */
     else if (randomNumber >= 4 && randomNumber <= 6){
-        roadToSpawnCarsOn->amountOfCars += PERCENT_2_CAR_SPAWN;
+        roadTolegacySpawnCarsOn->amountOfCars += PERCENT_2_CAR_SPAWN;
     }
     /* The 1% += PERCENT_3_CAR_SPAWN */
     else if (randomNumber == 7){
-        roadToSpawnCarsOn->amountOfCars += PERCENT_3_CAR_SPAWN;
+        roadTolegacySpawnCarsOn->amountOfCars += PERCENT_3_CAR_SPAWN;
     }
     return;
 }
@@ -194,4 +193,46 @@ void trafficLightLogic(trafficLight_t* trafficLight, int *timer){
     }
 
     return;
+}
+
+/* !!! DO FIRST USE THIS FUNCTION WHEN WE HAVE changed TICK TO SECONDS !!!*/
+/* Spawn random amount of cars between 0 and 4 */
+void spawnCars(road_t* roadToSpawnOn){
+    int randomNumber = 0;
+
+    /* Generate number between 0 and 100 */
+    randomNumber = rand() % 100;
+
+    /* 40% chance for 3 car spawn */
+    if(randomNumber <= 40){
+        roadToSpawnOn->amountOfCars += 3;
+        printf("3 . . .\n");
+        return;
+    }
+    /* 20% chance of 4 car spawn */
+    else if (randomNumber > 40 && randomNumber <= 60){
+        roadToSpawnOn->amountOfCars += 4;
+        printf("4 . . . .\n");
+        return;
+    }
+    /* 20% chance of 2 car spawn */
+    else if (randomNumber > 60 && randomNumber <= 80){
+        roadToSpawnOn->amountOfCars += 2;
+        printf("2 . .\n");
+        return;
+    }
+    /* 15% chance of 1 car spawn */
+    else if (randomNumber > 80 && randomNumber <= 95){
+        roadToSpawnOn->amountOfCars += 1;
+        printf("1 .\n");
+        return;
+    }
+    /* 5% chance of 0 car spawn */
+    else if (randomNumber > 95){
+        printf("0\n");
+        return;
+    } else {
+        printf("ERROR! Wrong random number for spawn\n");
+        return;
+    }
 }
