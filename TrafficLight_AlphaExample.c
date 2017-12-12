@@ -8,16 +8,17 @@
 #include <math.h>
 
 /* General simulation defines */
-#define SEED 10
+#define SEED 55
 #define AMOUNT_OF_CARS_PASS_PER_TICK 3
-#define PERCENT_3_CAR_SPAWN 1
-#define PERCENT_2_CAR_SPAWN 2
-#define PERCENT_1_CAR_SPAWN 3
+#define PERCENT_3_CAR_SPAWN 3
+#define PERCENT_2_CAR_SPAWN 4
+#define PERCENT_1_CAR_SPAWN 5
 
 /* Neural network defines */
-#define MAX_NEURON_IN_LAYER 5
+#define MAX_NEURON_IN_LAYER 40
 #define NUM_NEURON_LAYER_START 5
-#define NUM_NEURON_LAYER_1 4
+#define NUM_NEURON_LAYER_1 40
+#define NUM_NEURON_LAYER_2 20
 #define NUM_NEURON_LAYER_END 2
 #define EULER 2.71828182845904523536028747135266249775724709369995
 
@@ -47,6 +48,7 @@ typedef struct neuron_s{
 typedef struct neuralNetwork_s{
     neuron_t startLayer[NUM_NEURON_LAYER_START];
     neuron_t firstLayer[NUM_NEURON_LAYER_1];
+    neuron_t secondLayer[NUM_NEURON_LAYER_2];
     neuron_t endLayer[NUM_NEURON_LAYER_END];
 } neuralNetwork_t;
 
@@ -58,10 +60,12 @@ void printVisualization(trafficLight_t* trafficLight, int i);
 void removeCars(road_t* road1, road_t* road2);
 void trafficLightLogic(trafficLight_t* trafficLight, neuralNetwork_t* theNeuralNetwork);
 void fillNeuralNetwork(neuralNetwork_t* neuralNetworkToBeFilled, int bFromFile);
+void fillIndividualLayer(int numThis, int numNext, neuron_t layerToFill[]);
 double randomDecimal();
 void sigmoid(double* x);
 int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTrafficLight);
 double neuronWeightedValue(neuron_t neuron, int idInNext);
+void fillNeuronLayer(int layerSize, int prevLayerSize, neuron_t thisLayer[], neuron_t prevLayer[]);
 
 /* The main function */
 int main(void) {
@@ -224,25 +228,28 @@ void trafficLightLogic(trafficLight_t* trafficLight, neuralNetwork_t* theNeuralN
 
 /* Function to fill the neural network - either from file or random */
 void fillNeuralNetwork(neuralNetwork_t* neuralNetworkToBeFilled, int bFromFile){
-    int i = 0, n = 0;
-
     /* Look if they shall be randomly generated or 1read from file */
     if (bFromFile == 0){
         printf("[Randomizing neural network weights]\n");
-        /* Start layer: Randomize inital weights */
-        for (i = 0; i < NUM_NEURON_LAYER_START; i++) {
-            for (n = 0; n < NUM_NEURON_LAYER_1; n++) {
-                neuralNetworkToBeFilled->startLayer[i].weightToNext[n] = randomDecimal();
-            }
-        }
-        /* First layer: Randomize inital weights and bias */
-        for (i = 0; i < NUM_NEURON_LAYER_1; i++) {
-            for (n = 0; n < NUM_NEURON_LAYER_END; n++) {
-                neuralNetworkToBeFilled->firstLayer[i].weightToNext[n] = randomDecimal();
-            }
-        }
+
+        fillIndividualLayer(NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, neuralNetworkToBeFilled->startLayer);
+        fillIndividualLayer(NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_2, neuralNetworkToBeFilled->firstLayer);
+        fillIndividualLayer(NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_END, neuralNetworkToBeFilled->secondLayer);
     } else {
         /* !!! OPEN from file, once functionality has been made !!! */
+    }
+    return;
+}
+
+/* Fill an individual neuron layer */
+void fillIndividualLayer(int numThis, int numNext, neuron_t layerToFill[]){
+    int i = 0, n = 0;
+
+    /* Loop first for each neuron in layer, then fill "weightToNext" */
+    for (i = 0; i < numThis; i++) {
+        for (n = 0; n < numNext; n++) {
+            layerToFill[i].weightToNext[n] = randomDecimal();
+        }
     }
     return;
 }
@@ -265,11 +272,11 @@ void sigmoid(double* x){
 /* Error return value == -1 */
 /* [0] = vert (return 0) | [1] = hori (return 1) */
 int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTrafficLight){
-    int i = 0, n = 0;
+    int i = 0;
 
     /* Fill and normalize input values */
-    /* First four will be filled with (amountOfCars / 10) */
-    /* Last will be filled with current direction: vert == -1 | hori == 1 */
+    /* First four will be filled with amountOfCars */
+    /* Last will be filled with current direction: vert == 0 | hori == 1 */
     for (i = 0; i < NUM_NEURON_LAYER_START; i++) {
         switch (i) {
         case 0:
@@ -293,42 +300,12 @@ int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTraff
         }
     }
 
-    /* Run loop for the first layer */
-    for (i = 0; i < NUM_NEURON_LAYER_1; i++) {
-        /* First null the sumOfPrev */
-        theNeuralNetwork->firstLayer[i].sumOfPrev = 0;
+    /* Fill layers */
+    fillNeuronLayer(NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_START, theNeuralNetwork->firstLayer, theNeuralNetwork->startLayer);
+    fillNeuronLayer(NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_1, theNeuralNetwork->secondLayer, theNeuralNetwork->firstLayer);
+    fillNeuronLayer(NUM_NEURON_LAYER_END, NUM_NEURON_LAYER_2, theNeuralNetwork->endLayer, theNeuralNetwork->secondLayer);
 
-        /* Sum the values of each previous neuron (input) * their weight to this neuron */
-        for (n = 0; n < NUM_NEURON_LAYER_START; n++) {
-            theNeuralNetwork->firstLayer[i].sumOfPrev += neuronWeightedValue(theNeuralNetwork->startLayer[n], i);
-        }
-
-        /* Squish sum into 0 to 1 range using sigmoid function */
-        sigmoid(&theNeuralNetwork->firstLayer[i].sumOfPrev);
-
-        /* Set value to sum */
-        theNeuralNetwork->firstLayer[i].value = theNeuralNetwork->firstLayer[i].sumOfPrev;
-    }
-
-    /* Loop for each output */
-    for (i = 0; i < NUM_NEURON_LAYER_END; i++) {
-        /* First null the sumOfPrev */
-        theNeuralNetwork->endLayer[i].sumOfPrev = 0;
-
-        /* Sum the values of each previous neuron (layer 1) * their weight to this neuron */
-        for (n = 0; n < NUM_NEURON_LAYER_1; n++) {
-            theNeuralNetwork->endLayer[i].sumOfPrev += neuronWeightedValue(theNeuralNetwork->firstLayer[n], i);
-        }
-
-        /* Squish sum into 0 to 1 range using sigmoid function */
-        sigmoid(&theNeuralNetwork->endLayer[i].sumOfPrev);
-
-        /* Set value to sum */
-        theNeuralNetwork->endLayer[i].value = theNeuralNetwork->endLayer[i].sumOfPrev;
-
-        printf("END VALUE: %lf\n", theNeuralNetwork->endLayer[i].value);
-    }
-
+    /* Decide return value, based on largest end value */
     if (theNeuralNetwork->endLayer[0].value > theNeuralNetwork->endLayer[1].value){
         return 0;
     } else if (theNeuralNetwork->endLayer[0].value == theNeuralNetwork->endLayer[1].value){
@@ -342,4 +319,26 @@ int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTraff
 /* Returns the weighted value of a given neuron */
 double neuronWeightedValue(neuron_t neuron, int idInNext){
     return (neuron.value * neuron.weightToNext[idInNext]);
+}
+
+/* Function used to fill a given layer */
+void fillNeuronLayer(int layerSize, int prevLayerSize, neuron_t thisLayer[], neuron_t prevLayer[]){
+    int i = 0, n = 0;
+
+    for (i = 0; i < layerSize; i++) {
+        /* First null the sumOfPrev */
+        thisLayer[i].sumOfPrev = 0;
+
+        /* Sum the values of each previous neuron (input) * their weight to this neuron */
+        for (n = 0; n < prevLayerSize; n++) {
+            thisLayer[i].sumOfPrev += neuronWeightedValue(prevLayer[n], i);
+        }
+
+        /* Squish sum into -1 to 1 range using tanh function */
+        thisLayer[i].sumOfPrev = tanh(thisLayer[i].sumOfPrev);
+
+        /* Set value to sum */
+        thisLayer[i].value = thisLayer[i].sumOfPrev;
+    }
+    return;
 }
