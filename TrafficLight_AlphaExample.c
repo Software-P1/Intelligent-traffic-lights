@@ -21,6 +21,7 @@
 #define NUM_NEURON_LAYER_2 20
 #define NUM_NEURON_LAYER_END 2
 #define EULER 2.71828182845904523536028747135266249775724709369995
+#define NEURAL_SAVE_FILE_NAME "networkSave.csv"
 
 /* Struct pr. road placement */
 typedef struct road_s{
@@ -66,6 +67,8 @@ void sigmoid(double* x);
 int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTrafficLight);
 double neuronWeightedValue(neuron_t neuron, int idInNext);
 void fillNeuronLayer(int layerSize, int prevLayerSize, neuron_t thisLayer[], neuron_t prevLayer[]);
+void saveNeuralNetwork(neuralNetwork_t* neuralNetworkToSave);
+void saveIndividualLayer(FILE* file, int thisNum, int nextNum, neuron_t layer[]);
 
 /* The main function */
 int main(void) {
@@ -81,8 +84,9 @@ int main(void) {
     fillTrafficLight(&trafficLight, &rLeftRight, &rRightLeft, &rUpDown, &rDownUp);
     trafficLight.bVertical = 0;
 
-    /* Fill neural the neural network */
+    /* Fill & save the neural network */
     fillNeuralNetwork(&theNeuralNetwork, 0);
+    saveNeuralNetwork(&theNeuralNetwork);
 
     /* Ask user for input */
     do{
@@ -340,5 +344,38 @@ void fillNeuronLayer(int layerSize, int prevLayerSize, neuron_t thisLayer[], neu
         /* Set value to sum */
         thisLayer[i].value = thisLayer[i].sumOfPrev;
     }
+    return;
+}
+
+/* Saves the weights of each neuron */
+/* Each layer is split by a newline */
+/* First line is sizes - to be able to verify that it is the same */
+/* Neuron format: Neurons seperated by ; weights seperated by , */
+void saveNeuralNetwork(neuralNetwork_t* neuralNetworkToSave){
+    /* Create file and open it in writing mode*/
+    FILE* file;
+    file = fopen(NEURAL_SAVE_FILE_NAME, "w");
+
+    /* Save sizes */
+    fprintf(file, " %d;%d;%d;%d\n", NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_END);
+
+    /* Save each layer */
+    saveIndividualLayer(file, NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, neuralNetworkToSave->startLayer);
+    saveIndividualLayer(file, NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_2, neuralNetworkToSave->firstLayer);
+    saveIndividualLayer(file, NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_END, neuralNetworkToSave->secondLayer);
+    return;
+}
+
+/* Save individual layer */
+void saveIndividualLayer(FILE* file, int thisNum, int nextNum, neuron_t layer[]){
+    int i = 0, n = 0;
+    /* Save weights for layer  */
+    for (i = 0; i < thisNum; i++) {
+        for (n = 0; n < nextNum; n++) {
+            fprintf(file, "%lf%c", layer[i].weightToNext[n], (n != (nextNum-1)) ? ',' : '0');
+        }
+        fprintf(file, ";");
+    }
+    fprintf(file, "\n");
     return;
 }
