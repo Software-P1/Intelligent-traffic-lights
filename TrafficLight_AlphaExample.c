@@ -22,6 +22,7 @@
 #define NUM_NEURON_LAYER_END 2
 #define EULER 2.71828182845904523536028747135266249775724709369995
 #define NEURAL_SAVE_FILE_NAME "networkSave.csv"
+#define MAX_STR_LEN 7500
 
 /* Struct pr. road placement */
 typedef struct road_s{
@@ -85,7 +86,7 @@ int main(void) {
     trafficLight.bVertical = 0;
 
     /* Fill & save the neural network */
-    fillNeuralNetwork(&theNeuralNetwork, 0);
+    fillNeuralNetwork(&theNeuralNetwork, 1);
     saveNeuralNetwork(&theNeuralNetwork);
 
     /* Ask user for input */
@@ -239,8 +240,35 @@ void fillNeuralNetwork(neuralNetwork_t* neuralNetworkToBeFilled, int bFromFile){
         fillIndividualLayer(NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, neuralNetworkToBeFilled->startLayer);
         fillIndividualLayer(NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_2, neuralNetworkToBeFilled->firstLayer);
         fillIndividualLayer(NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_END, neuralNetworkToBeFilled->secondLayer);
+    } else if (bFromFile == 1) {
+        char str[MAX_STR_LEN] = "", voidStr[50] = "";
+        int size1 = 0, size2 = 0, size3 = 0, size4 = 0;
+        /* Open file in read mode */
+        FILE* file;
+        file = fopen(NEURAL_SAVE_FILE_NAME, "r");
+
+        printf("[Loading neural weights from %s]\n", NEURAL_SAVE_FILE_NAME);
+
+        /* Make sure that the files has the correct sizes */
+        fgets(str, MAX_STR_LEN, file);
+        sscanf(str, "%d" "%c" "%d" "%c" "%d" "%c" "%d",
+               &size1, voidStr, &size2, voidStr, &size3, voidStr, &size4);
+        if (size1 != NUM_NEURON_LAYER_START || size2 != NUM_NEURON_LAYER_1 ||
+            size3 != NUM_NEURON_LAYER_2 || size4 != NUM_NEURON_LAYER_END) {
+            printf("!!! ERROR! File does not match size of layers! - Randomized weights instead !!!\n");
+            fillNeuralNetwork(neuralNetworkToBeFilled, 0);
+            return;
+        }
+
+        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! STILL NEED TO LOAD REST OF FILE !!!!!! */
+        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! STILL NEED TO LOAD REST OF FILE !!!!!! */
+        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! STILL NEED TO LOAD REST OF FILE !!!!!! */
+        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! STILL NEED TO LOAD REST OF FILE !!!!!! */
+        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! STILL NEED TO LOAD REST OF FILE !!!!!! */
+
+        fclose(file);
     } else {
-        /* !!! OPEN from file, once functionality has been made !!! */
+        printf("ERROR! Wrong bFromFile value!\n");
     }
     return;
 }
@@ -357,7 +385,7 @@ void saveNeuralNetwork(neuralNetwork_t* neuralNetworkToSave){
     file = fopen(NEURAL_SAVE_FILE_NAME, "w");
 
     /* Save sizes */
-    fprintf(file, " %d;%d;%d;%d\n", NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_END);
+    fprintf(file, "%d;%d;%d;%d\n", NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_END);
 
     /* Save each layer */
     saveIndividualLayer(file, NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, neuralNetworkToSave->startLayer);
