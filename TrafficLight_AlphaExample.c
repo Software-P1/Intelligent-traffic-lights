@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* General simulation defines */
 #define SEED 10
@@ -31,6 +32,8 @@ void printVisualization(trafficLight_t *trafficLight, int i);
 void removeCars(road_t *road1, road_t *road2);
 void trafficLightLogic(trafficLight_t *trafficLight, int *timer);
 void spawnCars(road_t *roadToSpawnOn);
+void printCsv(int rUpDown, int rDownUp,int rRightLeft, int rLeftRight);
+
 
 /* The main function */
 int main(void) {
@@ -71,20 +74,22 @@ int main(void) {
         trafficLightLogic(&trafficLight, &timer);
 
         /* Remove cars this tick */
-        if(trafficLight.bVertical == 2) {
-            removeCars(trafficLight.rRightLeft, trafficLight.rLeftRight);
-            trafficLight.rUpDown->waitTime++;
-            trafficLight.rDownUp->waitTime++;
-        } else if(trafficLight.bVertical == 1) {
-            removeCars(trafficLight.rUpDown, trafficLight.rDownUp);
-            trafficLight.rRightLeft->waitTime++;
-            trafficLight.rLeftRight->waitTime++;
-        } else if(trafficLight.bVertical == -1 || trafficLight.bVertical == -2) {
-        /* Intentiually left blank */
-        } else {
-            printf("ERROR - bVertical is a wrong value!!!\n");
+        switch(trafficLight.bVertical) {
+            case 1:
+                removeCars(trafficLight.rUpDown, trafficLight.rDownUp);
+                break;
+            case 2:
+                removeCars(trafficLight.rRightLeft, trafficLight.rLeftRight);
+                break;
         }
+        /* Updates wait timer*/
+        trafficLight.rUpDown->waitTime += trafficLight.rUpDown->amountOfCars;
+        trafficLight.rDownUp->waitTime += trafficLight.rDownUp->amountOfCars;
+        trafficLight.rRightLeft->waitTime += trafficLight.rRightLeft->amountOfCars;
+        trafficLight.rLeftRight->waitTime += trafficLight.rLeftRight->amountOfCars;
 
+        /* Prints to CSV file*/
+        printCsv(trafficLight.rUpDown->waitTime, trafficLight.rDownUp->waitTime, trafficLight.rRightLeft->waitTime, trafficLight.rLeftRight->waitTime);
         /* If visualization is desired, then print */
         if(bDraw) {
             printVisualization(&trafficLight, i);
@@ -135,6 +140,19 @@ void legacySpawnCars(road_t *roadTolegacySpawnCarsOn) {
         roadTolegacySpawnCarsOn->amountOfCars += PERCENT_3_CAR_SPAWN;
     }
     return;
+}
+
+void printCsv(int rUpDown, int rDownUp, int rRightLeft, int rLeftRight) {
+    char *carData;
+    FILE *fp;
+
+    carData = "carData.csv";
+
+    fp = fopen(carData, "a");
+
+    fprintf(fp,"%d;%d;%d;%d\n", rUpDown, rDownUp,rRightLeft, rLeftRight);
+
+    fclose(fp);
 }
 
 /* Print a visualization of the road */
