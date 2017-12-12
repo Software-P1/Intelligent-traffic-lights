@@ -8,7 +8,7 @@
 #include <math.h>
 
 /* General simulation defines */
-#define SEED 55
+#define SEED 123
 #define AMOUNT_OF_CARS_PASS_PER_TICK 3
 #define PERCENT_3_CAR_SPAWN 3
 #define PERCENT_2_CAR_SPAWN 4
@@ -363,6 +363,7 @@ void saveNeuralNetwork(neuralNetwork_t* neuralNetworkToSave){
     saveIndividualLayer(file, NUM_NEURON_LAYER_START, NUM_NEURON_LAYER_1, neuralNetworkToSave->startLayer);
     saveIndividualLayer(file, NUM_NEURON_LAYER_1, NUM_NEURON_LAYER_2, neuralNetworkToSave->firstLayer);
     saveIndividualLayer(file, NUM_NEURON_LAYER_2, NUM_NEURON_LAYER_END, neuralNetworkToSave->secondLayer);
+    fclose(file);
     return;
 }
 
