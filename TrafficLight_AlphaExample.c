@@ -40,6 +40,9 @@ void printVisualization(trafficLight_t* trafficLight, int i);
 void removeCars(road_t* road1, road_t* road2);
 void trafficLightLogic(trafficLight_t* trafficLight, int *timer);
 void spawnCars(road_t* roadToSpawnOn);
+<<<<<<< HEAD
+>>>>>>> 241f8a230c9a51b726a2487fb3e5ded492b51e48
+=======
 >>>>>>> 241f8a230c9a51b726a2487fb3e5ded492b51e48
 
 /* The main function */
@@ -127,7 +130,11 @@ void fillTrafficLight(trafficLight_t *trafficLightToBeFilled, road_t *rLeftRight
 
 /* Spawns cars on a single road */
 <<<<<<< HEAD
+<<<<<<< HEAD
 void spawnCars(road_t *roadToSpawnCarsOn){
+=======
+void legacySpawnCars(road_t* roadTolegacySpawnCarsOn){
+>>>>>>> 241f8a230c9a51b726a2487fb3e5ded492b51e48
 =======
 void legacySpawnCars(road_t* roadTolegacySpawnCarsOn){
 >>>>>>> 241f8a230c9a51b726a2487fb3e5ded492b51e48
