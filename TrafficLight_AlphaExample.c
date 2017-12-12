@@ -17,20 +17,20 @@ typedef struct road_s{
 /* Struct for the traffic light */
 typedef struct trafficLight_s{
     int bVertical;
-    road_t* rLeftRight;
-    road_t* rRightLeft;
-    road_t* rUpDown;
-    road_t* rDownUp;
+    road_t *rLeftRight;
+    road_t *rRightLeft;
+    road_t *rUpDown;
+    road_t *rDownUp;
 } trafficLight_t;
 
 /* Top-down programming declaration of functions */
-void fillTrafficLight(trafficLight_t* trafficLightToBeFilled, road_t* rLeftRight,
-                      road_t* rRightLeft, road_t* rUpDown, road_t* rDownUp);
-void legacySpawnCars(road_t* roadTolegacySpawnCarsOn);
-void printVisualization(trafficLight_t* trafficLight, int i);
-void removeCars(road_t* road1, road_t* road2);
-void trafficLightLogic(trafficLight_t* trafficLight, int *timer);
-void spawnCars(road_t* roadToSpawnOn);
+void fillTrafficLight(trafficLight_t *trafficLightToBeFilled, road_t *rLeftRight,
+                      road_t *rRightLeft, road_t *rUpDown, road_t *rDownUp);
+void legacySpawnCars(road_t *roadTolegacySpawnCarsOn);
+void printVisualization(trafficLight_t *trafficLight, int i);
+void removeCars(road_t *road1, road_t *road2);
+void trafficLightLogic(trafficLight_t *trafficLight, int *timer);
+void spawnCars(road_t *roadToSpawnOn);
 
 /* The main function */
 int main(void) {
@@ -96,8 +96,8 @@ int main(void) {
 }
 
 /* Fill the traffic light with information */
-void fillTrafficLight(trafficLight_t* trafficLightToBeFilled, road_t* rLeftRight,
-                      road_t* rRightLeft, road_t* rUpDown, road_t* rDownUp){
+void fillTrafficLight(trafficLight_t *trafficLightToBeFilled, road_t *rLeftRight,
+                      road_t *rRightLeft, road_t *rUpDown, road_t *rDownUp){
     trafficLightToBeFilled->rLeftRight = rLeftRight;
     trafficLightToBeFilled->rRightLeft = rRightLeft;
     trafficLightToBeFilled->rUpDown = rUpDown;
@@ -116,7 +116,7 @@ void fillTrafficLight(trafficLight_t* trafficLightToBeFilled, road_t* rLeftRight
 }
 
 /* Spawns cars on a single road */
-void legacySpawnCars(road_t* roadTolegacySpawnCarsOn){
+void legacySpawnCars(road_t *roadTolegacySpawnCarsOn){
     int randomNumber = 0;
 
     /* Get random number */
@@ -138,7 +138,7 @@ void legacySpawnCars(road_t* roadTolegacySpawnCarsOn){
 }
 
 /* Print a visualization of the road */
-void printVisualization(trafficLight_t* trafficLight, int i){
+void printVisualization(trafficLight_t *trafficLight, int i){
     printf("========= TICK %-4d =========\n", i);
     printf("       |     |     |         \n");
     printf("_______| %-4d|     |_______  \n", trafficLight->rUpDown->amountOfCars);
@@ -153,7 +153,7 @@ void printVisualization(trafficLight_t* trafficLight, int i){
 }
 
 /* Removes cars from one tick */
-void removeCars(road_t* road1, road_t* road2){
+void removeCars(road_t *road1, road_t *road2){
     /* Null time, since it moved */
     road1->waitTime = road2->waitTime = 0;
 
@@ -170,7 +170,7 @@ void removeCars(road_t* road1, road_t* road2){
 }
 
 /* Traffic light logic */
-void trafficLightLogic(trafficLight_t* trafficLight, int *timer){
+void trafficLightLogic(trafficLight_t *trafficLight, int *timer){
     if (*timer > 0){
         *timer = *timer - 1;
     } else {
@@ -197,7 +197,7 @@ void trafficLightLogic(trafficLight_t* trafficLight, int *timer){
 
 /* !!! DO FIRST USE THIS FUNCTION WHEN WE HAVE changed TICK TO SECONDS !!!*/
 /* Spawn random amount of cars between 0 and 4 */
-void spawnCars(road_t* roadToSpawnOn){
+void spawnCars(road_t *roadToSpawnOn){
     int randomNumber = 0;
 
     /* Generate number between 0 and 100 */
