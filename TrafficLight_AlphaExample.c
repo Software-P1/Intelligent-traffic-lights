@@ -32,7 +32,7 @@ void printVisualization(trafficLight_t *trafficLight, int i);
 void removeCars(road_t *road1, road_t *road2);
 void trafficLightLogic(trafficLight_t *trafficLight, int *timer);
 void spawnCars(road_t *roadToSpawnOn);
-void printCsv(int rUpDown, int rDownUp,int rRightLeft, int rLeftRight);
+void printCsv(int rUpDown, int rDownUp,int rRightLeft, int rLeftRight, int totalWait);
 
 
 /* The main function */
@@ -41,6 +41,7 @@ int main(void) {
     road_t rLeftRight, rRightLeft, rUpDown, rDownUp;
     trafficLight_t trafficLight;
     int timer = 0;
+    int totalWait = 0;
 
     /* Seed randomization */
     srand(SEED);
@@ -87,9 +88,15 @@ int main(void) {
         trafficLight.rDownUp->waitTime += trafficLight.rDownUp->amountOfCars;
         trafficLight.rRightLeft->waitTime += trafficLight.rRightLeft->amountOfCars;
         trafficLight.rLeftRight->waitTime += trafficLight.rLeftRight->amountOfCars;
+        /* Accumilated wait time for all lanes*/
+        totalWait += trafficLight.rUpDown->amountOfCars
+                  + trafficLight.rDownUp->amountOfCars
+                  + trafficLight.rRightLeft->amountOfCars
+                  + trafficLight.rLeftRight->amountOfCars;
 
-        /* Prints to CSV file*/
-        printCsv(trafficLight.rUpDown->waitTime, trafficLight.rDownUp->waitTime, trafficLight.rRightLeft->waitTime, trafficLight.rLeftRight->waitTime);
+        /* Prints wait time for lanes to CSV file*/
+        printCsv(trafficLight.rUpDown->waitTime, trafficLight.rDownUp->waitTime, trafficLight.rRightLeft->waitTime, trafficLight.rLeftRight->waitTime, totalWait);
+        
         /* If visualization is desired, then print */
         if(bDraw) {
             printVisualization(&trafficLight, i);
@@ -142,7 +149,7 @@ void legacySpawnCars(road_t *roadTolegacySpawnCarsOn) {
     return;
 }
 
-void printCsv(int rUpDown, int rDownUp, int rRightLeft, int rLeftRight) {
+void printCsv(int rUpDown, int rDownUp, int rRightLeft, int rLeftRight, int totalWait) {
     char *carData;
     FILE *fp;
 
@@ -150,7 +157,7 @@ void printCsv(int rUpDown, int rDownUp, int rRightLeft, int rLeftRight) {
 
     fp = fopen(carData, "a");
 
-    fprintf(fp,"%d;%d;%d;%d\n", rUpDown, rDownUp,rRightLeft, rLeftRight);
+    fprintf(fp,"%d;%d;%d;%d;%d\n", rUpDown, rDownUp,rRightLeft, rLeftRight, totalWait);
 
     fclose(fp);
 }
