@@ -3,7 +3,7 @@
 #include <string.h>
 
 /* General simulation defines */
-#define SEED 10
+#define SEED 11234556
 #define AMOUNT_OF_CARS_PASS_PER_TICK 3 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
 #define PERCENT_3_CAR_SPAWN 1 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
 #define PERCENT_2_CAR_SPAWN 2 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
@@ -163,35 +163,34 @@ void removeCars(trafficLight_t *trafficLight, int *timeUntilRemove) {
 
     /* 5% chance of 10 sec */
     if (randomNumber <= 5) {
-        *timeUntilRemove = 10;
+        *timeUntilRemove = 8;
     }
     /* 15% chance of 9 sec */
     else if (randomNumber <= 20 && randomNumber > 5) {
-        *timeUntilRemove = 9;
+        *timeUntilRemove = 7;
     }
     /* 40% chance of 8 sec */
     else if (randomNumber <= 60 && randomNumber > 20) {
-        *timeUntilRemove = 8;
+        *timeUntilRemove = 6;
     }
     /* 15% chance of 7 sec */
     else if (randomNumber <= 75 && randomNumber > 60) {
-        *timeUntilRemove = 7;
+        *timeUntilRemove = 5;
     }
     /* 10% chance of 6 sec */
     else if (randomNumber <= 85 && randomNumber > 75) {
-        *timeUntilRemove = 6;
+        *timeUntilRemove = 4;
     }
     /* 10% chance of 5 sec */
     else if (randomNumber <= 95 && randomNumber > 85) {
-        *timeUntilRemove = 5;
+        *timeUntilRemove = 3;
     }
     /* 5% chance of 4 sec*/
     else if (randomNumber <= 100 && randomNumber > 95) {
-        *timeUntilRemove = 4;
+        *timeUntilRemove = 2;
     } else {
         printf("ERROR in remove cars\n");
     }
-
     return;
 }
 
@@ -199,9 +198,11 @@ void removeCars(trafficLight_t *trafficLight, int *timeUntilRemove) {
 void removeCarsIndividual(int *amountRoad1, int *amountRoad2){
     if (*amountRoad1 > 0) {
         *amountRoad1 = *amountRoad1 - 1;
+        printf("removed 1\n");
     }
     if (*amountRoad2 > 0) {
         *amountRoad2 = *amountRoad2 - 1;
+        printf("removed 2\n");
     }
     return;
 }
