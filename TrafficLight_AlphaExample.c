@@ -240,6 +240,12 @@ void trafficLightLogic(trafficLight_t *trafficLight, int *timer) {
 void spawnCars(trafficLight_t *trafficLight) {
     int randomNumber = 0;
 
+    /* !!! THIS WILL BE CHANGED TO CHANCE PR. ROAD SPAWN !!! */
+    /* !!! THIS WILL BE CHANGED TO CHANCE PR. ROAD SPAWN !!! */
+    /* !!! THIS WILL BE CHANGED TO CHANCE PR. ROAD SPAWN !!! */
+    /* !!! THIS WILL BE CHANGED TO CHANCE PR. ROAD SPAWN !!! */
+    /* !!! THIS WILL BE CHANGED TO CHANCE PR. ROAD SPAWN !!! */
+
     /* Generate number between 0 and 100000 (100% with 2 decimals in intiger form) */
     randomNumber = rand() % 100;
 
@@ -247,7 +253,7 @@ void spawnCars(trafficLight_t *trafficLight) {
     if (randomNumber <= 25) {
         /* Generate number between 0 and 100000 (100% with 3 decimals in intiger form) */
         randomNumber = rand() % 100;
-                                                                                    /*!!!Change % calculations!!!x_X_x*/
+
         /*35,47% chance for vertical = ~18% pr road*/
         if (randomNumber <= 18) {
             trafficLight->rLeftRight->amountOfCars += 1;
