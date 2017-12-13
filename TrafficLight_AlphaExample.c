@@ -34,6 +34,7 @@ void removeCars(road_t *road1, road_t *road2);
 void trafficLightLogic(trafficLight_t *trafficLight, int *timer);
 void spawnCars(road_t *roadToSpawnOn);
 void printCsv(int rUpDown, int rDownUp,int rRightLeft, int rLeftRight, int totalWait);
+void callAgent(trafficLight_t *trafficLight);
 
 
 /* The main function */
