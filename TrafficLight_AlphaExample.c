@@ -8,6 +8,7 @@
 #define PERCENT_3_CAR_SPAWN 1 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
 #define PERCENT_2_CAR_SPAWN 2 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
 #define PERCENT_1_CAR_SPAWN 3 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
+#define CAR_DATA_FILE "carData.csv"
 
 /* Struct pr. road placement */
 typedef struct road_s {
@@ -95,8 +96,10 @@ int main(void) {
                   + trafficLight.rLeftRight->amountOfCars;
 
         /* Prints wait time for lanes to CSV file*/
-        printCsv(trafficLight.rUpDown->waitTime, trafficLight.rDownUp->waitTime, trafficLight.rRightLeft->waitTime, trafficLight.rLeftRight->waitTime, totalWait);
-        
+        printCsv(trafficLight.rUpDown->waitTime, trafficLight.rDownUp->waitTime,
+                 trafficLight.rRightLeft->waitTime, trafficLight.rLeftRight->waitTime,
+                 totalWait);
+
         /* If visualization is desired, then print */
         if(bDraw) {
             printVisualization(&trafficLight, i);
@@ -149,17 +152,15 @@ void legacySpawnCars(road_t *roadTolegacySpawnCarsOn) {
     return;
 }
 
+/* Creates a .csv that saves how many people are in each direction and total wait time */
 void printCsv(int rUpDown, int rDownUp, int rRightLeft, int rLeftRight, int totalWait) {
-    char *carData;
-    FILE *fp;
+    FILE *file;
+    file = fopen(CAR_DATA_FILE, "a");
 
-    carData = "carData.csv";
+    fprintf(file,"%d;%d;%d;%d;%d\n", rUpDown, rDownUp,rRightLeft, rLeftRight, totalWait);
 
-    fp = fopen(carData, "a");
-
-    fprintf(fp,"%d;%d;%d;%d;%d\n", rUpDown, rDownUp,rRightLeft, rLeftRight, totalWait);
-
-    fclose(fp);
+    fclose(file);
+    return;
 }
 
 /* Print a visualization of the road */
@@ -196,27 +197,31 @@ void removeCars(road_t *road1, road_t *road2) {
 
 /* Traffic light logic */
 void trafficLightLogic(trafficLight_t *trafficLight, int *timer) {
-    if(*timer > 0) {
-        *timer = *timer - 1;
+    /* If timer is positive, then reduce it by one... */
+    /* ...else look at the bVertical value */
+    if (*timer > 0) {
+        *timer = *timer -1 ;
     } else {
         switch(trafficLight->bVertical) {
-            case -2:
-                trafficLight->bVertical = 1;
-                *timer = 3;
-                break;
-            case -1:
-                trafficLight->bVertical = 2;
-                *timer = 3;
-                break;
-            case 1:
-                trafficLight->bVertical = -1;
-                break;
-            case 2:
-                trafficLight->bVertical = -2;
-                break;
+        case -2:
+            trafficLight->bVertical = 1;
+            *timer = 3;
+            break;
+        case -1:
+            trafficLight->bVertical = 2;
+            *timer = 3;
+            break;
+        case 1:
+            trafficLight->bVertical = -1;
+            break;
+        case 2:
+            trafficLight->bVertical = -2;
+            break;
+        default:
+            printf("ERROR! Wrong bVertical value in trafficLightLogic\n");
+            break;
         }
     }
-
     return;
 }
 
