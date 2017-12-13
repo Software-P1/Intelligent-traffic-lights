@@ -3,7 +3,7 @@
 #include <string.h>
 
 /* General simulation defines */
-#define SEED 11234556
+#define SEED 11234559
 #define CAR_DATA_FILE "carData.csv"
 
 /* Struct pr. road placement */
@@ -247,7 +247,7 @@ void spawnCars(trafficLight_t *trafficLight) {
     if (randomNumber <= 25) {
         /* Generate number between 0 and 100000 (100% with 3 decimals in intiger form) */
         randomNumber = rand() % 100;
-
+                                                                                    /*!!!Change % calculations!!!x_X_x*/
         /*35,47% chance for vertical = ~18% pr road*/
         if (randomNumber <= 18) {
             trafficLight->rLeftRight->amountOfCars += 1;
