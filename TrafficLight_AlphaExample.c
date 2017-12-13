@@ -76,6 +76,9 @@ int main(void) {
         /* Run the traffic light logic */
         trafficLightLogic(&trafficLight, &timer);
 
+        /* Reinfocement learning traffic light logic */
+        callAgent(&trafficLight);
+
         /* Remove cars this tick */
         switch(trafficLight.bVertical) {
             case 1:
@@ -224,6 +227,13 @@ void trafficLightLogic(trafficLight_t *trafficLight, int *timer) {
         }
     }
     return;
+}
+
+/* Agent for Reinfocement learning */
+void callAgent(trafficLight_t *trafficLight) {
+    typedef enum trafficLightState {-2, -1, 1, 2} trafficLightState;
+
+
 }
 
 /* !!! DO FIRST USE THIS FUNCTION WHEN WE HAVE changed TICK TO SECONDS !!!*/
