@@ -312,16 +312,16 @@ int runNeuralNetwork(neuralNetwork_t* theNeuralNetwork, trafficLight_t* theTraff
     for (i = 0; i < NUM_NEURON_LAYER_START; i++) {
         switch (i) {
         case 0:
-            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rUpDown->amountOfCars)/10;
+            theNeuralNetwork->startLayer[i].value = theTrafficLight->rUpDown->amountOfCars;
             break;
         case 1:
-            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rDownUp->amountOfCars)/10;
+            theNeuralNetwork->startLayer[i].value = theTrafficLight->rDownUp->amountOfCars;
             break;
         case 2:
-            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rLeftRight->amountOfCars)/10;
+            theNeuralNetwork->startLayer[i].value = theTrafficLight->rLeftRight->amountOfCars;
             break;
         case 3:
-            theNeuralNetwork->startLayer[i].value = (double)(theTrafficLight->rRightLeft->amountOfCars)/10;
+            theNeuralNetwork->startLayer[i].value = theTrafficLight->rRightLeft->amountOfCars;
             break;
         case 4:
             theNeuralNetwork->startLayer[i].value = (((double)(theTrafficLight->bVertical)) == 1) ? 1.0 : -1.0;
