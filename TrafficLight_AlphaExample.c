@@ -28,11 +28,10 @@ typedef struct trafficLight_s {
 /* Top-down programming declaration of functions */
 void fillTrafficLight(trafficLight_t *trafficLightToBeFilled, road_t *rLeftRight,
                       road_t *rRightLeft, road_t *rUpDown, road_t *rDownUp);
-void legacySpawnCars(road_t *roadTolegacySpawnCarsOn);
 void printVisualization(trafficLight_t *trafficLight, int i);
 void removeCars(road_t *road1, road_t *road2);
 void trafficLightLogic(trafficLight_t *trafficLight, int *timer);
-void spawnCars(road_t *roadToSpawnOn);
+void spawnCars(trafficLight_t *trafficLight);
 void printCsv(int rUpDown, int rDownUp,int rRightLeft, int rLeftRight, int totalWait);
 
 
@@ -67,22 +66,20 @@ int main(void) {
     for (i = 0; i < desiredTicks; i++) {
         /* !!! PLEASE NOTICE THAT IT IS NOW USING LEGACY METHOD UNTIL WE CHANGE INT SECOND PER TICK !!! */
         /* Spawn cars on each road */
-        legacySpawnCars(&rUpDown);
-        legacySpawnCars(&rRightLeft);
-        legacySpawnCars(&rLeftRight);
-        legacySpawnCars(&rDownUp);
+        spawnCars(&trafficLight);
+
 
         /* Run the traffic light logic */
         trafficLightLogic(&trafficLight, &timer);
 
         /* Remove cars this tick */
         switch(trafficLight.bVertical) {
-            case 1:
-                removeCars(trafficLight.rUpDown, trafficLight.rDownUp);
-                break;
-            case 2:
-                removeCars(trafficLight.rRightLeft, trafficLight.rLeftRight);
-                break;
+        case 1:
+            /*removeCars(trafficLight.rUpDown, trafficLight.rDownUp);*/
+            break;
+        case 2:
+            /*removeCars(trafficLight.rRightLeft, trafficLight.rLeftRight);*/
+            break;
         }
         /* Updates wait timer*/
         trafficLight.rUpDown->waitTime += trafficLight.rUpDown->amountOfCars;
@@ -127,28 +124,6 @@ void fillTrafficLight(trafficLight_t *trafficLightToBeFilled, road_t *rLeftRight
     trafficLightToBeFilled->rRightLeft->waitTime = 0;
     trafficLightToBeFilled->rUpDown->waitTime = 0;
     trafficLightToBeFilled->rDownUp->waitTime = 0;
-    return;
-}
-
-/* Spawns cars on a single road */
-void legacySpawnCars(road_t *roadTolegacySpawnCarsOn) {
-    int randomNumber = 0;
-
-    /* Get random number */
-    randomNumber = rand() % 100;
-
-    /* The 3% += PERCENT_1_CAR_SPAWN */
-    if(randomNumber >= 0 && randomNumber <= 3) {
-        roadTolegacySpawnCarsOn->amountOfCars += PERCENT_1_CAR_SPAWN;
-    }
-    /* The 2% += PERCENT_2_CAR_SPAWN */
-    else if(randomNumber >= 4 && randomNumber <= 6) {
-        roadTolegacySpawnCarsOn->amountOfCars += PERCENT_2_CAR_SPAWN;
-    }
-    /* The 1% += PERCENT_3_CAR_SPAWN */
-    else if(randomNumber == 7) {
-        roadTolegacySpawnCarsOn->amountOfCars += PERCENT_3_CAR_SPAWN;
-    }
     return;
 }
 
@@ -227,42 +202,31 @@ void trafficLightLogic(trafficLight_t *trafficLight, int *timer) {
 
 /* !!! DO FIRST USE THIS FUNCTION WHEN WE HAVE changed TICK TO SECONDS !!!*/
 /* Spawn random amount of cars between 0 and 4 */
-void spawnCars(road_t *roadToSpawnOn) {
+void spawnCars(trafficLight_t *trafficLight) {
     int randomNumber = 0;
 
-    /* Generate number between 0 and 100 */
+    /* Generate number between 0 and 100000 (100% with 2 decimals in intiger form) */
     randomNumber = rand() % 100;
 
-    /* 40% chance for 3 car spawn */
-    if(randomNumber <= 40) {
-        roadToSpawnOn->amountOfCars += 3;
-        printf("3 . . .\n");
-        return;
+    /*25,88 chance for spawning a car*/
+    if (randomNumber <= 25) {
+        /* Generate number between 0 and 100000 (100% with 3 decimals in intiger form) */
+        randomNumber = rand() % 100;
+
+        /*35,47% chance for vertical = ~18% pr road*/
+        if (randomNumber <= 18) {
+            trafficLight->rLeftRight->amountOfCars += 1;
+        } else if (randomNumber <= 36 && randomNumber > 18) {
+            trafficLight->rRightLeft->amountOfCars += 1;
+        }
+        /*64,53% chance for horisontal = ~32% pr road*/
+        else if (randomNumber <= 68 && randomNumber > 36) {
+            trafficLight->rUpDown->amountOfCars += 1;
+        } else if (randomNumber > 68 && randomNumber <= 100) {
+            trafficLight->rDownUp->amountOfCars += 1;
+        } else {
+            printf("ERROR! Wrong random number in spawn function\n");
+        }
     }
-    /* 20% chance of 4 car spawn */
-    else if(randomNumber > 40 && randomNumber <= 60) {
-        roadToSpawnOn->amountOfCars += 4;
-        printf("4 . . . .\n");
-        return;
-    }
-    /* 20% chance of 2 car spawn */
-    else if(randomNumber > 60 && randomNumber <= 80) {
-        roadToSpawnOn->amountOfCars += 2;
-        printf("2 . .\n");
-        return;
-    }
-    /* 15% chance of 1 car spawn */
-    else if(randomNumber > 80 && randomNumber <= 95) {
-        roadToSpawnOn->amountOfCars += 1;
-        printf("1 .\n");
-        return;
-    }
-    /* 5% chance of 0 car spawn */
-    else if(randomNumber > 95) {
-        printf("0\n");
-        return;
-    } else {
-        printf("ERROR! Wrong random number for spawn\n");
-        return;
-    }
+    return;
 }
