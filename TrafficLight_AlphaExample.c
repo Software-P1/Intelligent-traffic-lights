@@ -4,10 +4,6 @@
 
 /* General simulation defines */
 #define SEED 11234556
-#define AMOUNT_OF_CARS_PASS_PER_TICK 3 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
-#define PERCENT_3_CAR_SPAWN 1 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
-#define PERCENT_2_CAR_SPAWN 2 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
-#define PERCENT_1_CAR_SPAWN 3 /* !!! REMOVE WHEN WE CHANGE TO SECONDS !!! */
 #define CAR_DATA_FILE "carData.csv"
 
 /* Struct pr. road placement */
