@@ -49,7 +49,7 @@ int main(void) {
     /* Fill traffic light & initialize direction and time until remove */
     fillTrafficLight(&trafficLight, &rLeftRight, &rRightLeft, &rUpDown, &rDownUp);
     trafficLight.lightDir = 1;
-    timeUntilRemove = 8;
+    timeUntilRemove = 6;
 
     /* Ask user for input */
     do {
@@ -284,8 +284,8 @@ void waitTimeLogic(trafficLight_t *trafficLight, int *totalWait){
 
     /* Accumilated wait time for all lanes*/
     *totalWait += trafficLight->rUpDown->amountOfCars
-              + trafficLight->rDownUp->amountOfCars
-              + trafficLight->rRightLeft->amountOfCars
-              + trafficLight->rLeftRight->amountOfCars;
+               + trafficLight->rDownUp->amountOfCars
+               + trafficLight->rRightLeft->amountOfCars
+               + trafficLight->rLeftRight->amountOfCars;
     return;
 }
