@@ -77,7 +77,7 @@ int main(void) {
         if (removeCounter >= timeUntilRemove) {
             removeCars(&trafficLight, &timeUntilRemove);
             removeCounter = 0;
-        } 
+        }
 
         /* Prints wait time for lanes to CSV file*/
         waitTimeLogic(&trafficLight, &totalWait);
@@ -247,8 +247,8 @@ void trafficLightLogic(trafficLight_t *trafficLight, int *timer) {
 /* Tries to spawn a car on each road, based on gathered data * spawnFactor */
 void spawnCars(trafficLight_t *trafficLight, double spawnFactor) {
     /* Error mssage if it will not spawn cars */
-    if (spawnFactor < 1) {
-        printf("ERROR! spawnFactor is less than 1 == no car spawn\n");
+    if (spawnFactor <= 0) {
+        printf("ERROR! spawnFactor is less than or equal to 0 == no car spawn\n");
         return;
     }
 
