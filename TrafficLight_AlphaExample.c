@@ -4,7 +4,7 @@
 /* General simulation defines */
 #define SEED 11234559
 #define CAR_DATA_FILE "carData.csv"
-#define PRINT_MSG 0 /* 1 == print when spawn and remove */
+#define PRINT_MSG 1 /* 1 == print when spawn and remove */
 
 /* Struct pr. road placement */
 typedef struct road_s {
