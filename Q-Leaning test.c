@@ -10,6 +10,8 @@ int chooseAction(Q, s) {
   return 0;
 }
 
+/* Calculate reward */
+
 
 
 /* The main function */

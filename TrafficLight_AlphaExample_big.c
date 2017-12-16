@@ -1,3 +1,5 @@
+/* build with  https://github.com/jinfagang/Q-Learning/blob/master/main.cpp as an exampel*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,13 +36,12 @@ typedef struct trafficLight_s {
 /***********************************Reinforcement learning***********************************/
 /********************************************************************************************/
 /********************************************************************************************/
-const float Gamma = 0.8; /* Horizon */
-const float Aplha = 0.1; /* Learning rate */
+#define Gamma = 0.8 /* Horizon */
+#define Aplha = 0.1 /* Learning rate */
+#define MAX_EPISODE 1000
 
 
 /*States 4*3*4^4 = 3072 */
-#define nActions 4
-/*4[0] Current ligth direction: 0,1,2,3*/
 #define nTimes 3
 /*3[1] Time since last switch: 0: 0-9; 1: 10-179; 2: 180-999+*/
 #define nLane1 4
@@ -51,113 +52,23 @@ const float Aplha = 0.1; /* Learning rate */
 /*4[4] lane 3 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
 #define nLane4 4
 /*4[5] lane 4 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
-
+#define nActions 4
+/*4[0] Ligth direction: 0,1,2,3*/
+#define nStates 23333 /* states are 233333 */
 /*This would give us states like 103112 meaning that we are green up/down we have just changed to this states
   there are alot of cares in lane 1, few cars in lane 2 and 3 and between 4-9 cars in lane 4*/
 int i, z, j, k, l, m;
-double R[nActions][nTimes][nLane1][nLane2][nLane3][nLane4]; /* Reward tabel*/
 
-double Q[nActions][nTimes][nLane1][nLane2][nLane3][nLane4]; /* Q tabel */
+double R[nStates][nActions]; /* Reward tabel*/
 
-double get_state(trafficLight_t trafficLight) {
-
-}
-
-
-
-int possible_action[nActions];
-int possible_action_num;
-
-/* get in state s, possible actions */
-void get_possible_action(double R[nActions][nTimes][nLane1][nLane2][nLane3][nLane4], trafficLight_t trafficLight, int possible_action[nActions]){
-    int cTime;
-    int lane1;
-    int lane2;
-    int lane3;
-    int lane4;
-
-    switch (trafficLight.rLeftRight->amountOfCars) {
-      case 0:
-        lane1 = 0;
-        break;
-      case 1 ... 3:
-        lane1 = 1;
-        break;
-      case 4 ... 9:
-        lane1 = 2;
-      default:
-        lane1 = 3;
-        break;
-    }
-    switch (trafficLight.rRightLeft->amountOfCars) {
-      case 0:
-        lane2 = 0;
-        break;
-      case 1 ... 3:
-        lane2 = 1;
-        break;
-      case 4 ... 9:
-        lane2 = 2;
-      default:
-        lane2 = 3;
-        break;
-    }
-    switch (trafficLight.rUpDown->amountOfCars) {
-      case 0:
-        lane3 = 0;
-        break;
-      case 1 ... 3:
-        lane3 = 1;
-        break;
-      case 4 ... 9:
-        lane3 = 2;
-      default:
-        lane3 = 3;
-        break;
-    }
-    switch (trafficLight.rDownUp->amountOfCars) {
-      case 0:
-        lane4 = 0;
-        break;
-      case 1 ... 3:
-        lane4 = 1;
-        break;
-      case 4 ... 9:
-        lane4 = 2;
-      default:
-        lane4 = 3;
-        break;
-    }
-    switch (trafficLight.timer) {
-      case 0 ... 9:
-        cTime = 0;
-        break;
-      case 10 ... 179:
-        cTime = 1;
-        break;
-      default:
-        cTime = 2;
-        break;
-    }
-
-    /* find R[i][j] value > 0 is action we can do later */
-    possible_action_num = 0;
-    for(i = 0; i < nActions; i++){
-        if (R[i][cTime][lane1][lane2][lane3][lane4] >= 0){
-            possible_action[possible_action_num] = i;
-            possible_action_num++;
-        }
-    }
-}
-
-double get_max_q(double Q[nActions][nTimes][nLane1][nLane2][nLane3][nLane4], trafficLight_t trafficLight) {
+double Q[nStates][nActions]; /* Q tabel */
+long get_state(trafficLight_t trafficLight) { /* simplyfy state to a number*/
   int cTime;
   int lane1;
   int lane2;
   int lane3;
   int lane4;
-  int i;
-  double temp_max = 0;
+  int state;
 
   switch (trafficLight.rLeftRight->amountOfCars) {
     case 0:
@@ -223,28 +134,57 @@ double get_max_q(double Q[nActions][nTimes][nLane1][nLane2][nLane3][nLane4], tra
       break;
   }
 
+  /*Move numbers*/
+  cTime *= 10000;
+  lane1 *= 1000;
+  lane2 *= 100;
+  lane3 *= 10;
+  lane4;
+  state = cTime + lane1 + lane2 + lane3 + lane4;
+  /*nTime nLane1 nLane2 nLane3 nLane4 */
+  return state;
+}
+
+int possible_action[nActions];
+int possible_action_num;
+
+/* get in state s, possible actions */
+void get_possible_action(double R[nStates][nActions], int state, int possible_action[nActions]){
+    /* find R[i][j] value > 0 is action we can do later */
+    possible_action_num = 0;
+    for(i = 0; i < nActions; i++){
+        if (R[state][i] >= 0){
+            possible_action[possible_action_num] = i;
+            possible_action_num++;
+        }
+    }
+}
+
+double get_max_q(double Q[nStates][nActions], int state) {
+  double temp_max = 0;
   for (i = 0; i < nActions; ++i) {
-    if ((R[i][cTime][lane1][lane2][lane3][lane4] >= 0) && (Q[i][cTime][lane1][lane2][lane3][lane4] > temp_max)){
-      temp_max = Q[i][cTime][lane1][lane2][lane3][lane4];
+    if ((R[state][i] >= 0) && (Q[state][i] > temp_max)){
+      temp_max = Q[state][i];
     }
   }
   return temp_max;
 }
 
-int episode_iterator(trafficLight_t trafficLight, double Q[nActions][nTimes][nLane1][nLane2][nLane3][nLane4], double R[nActions][nTimes][nLane1][nLane2][nLane3][nLane4]){
+int episode_iterator(int init_state, double Q[nStates][nActions], double R[nStates][nActions]){
 
     double Q_before, Q_after;
     /* next action */
     int next_action;
     double max_q;
+    float alpha = 0.8;
 
     /* start series event loop */
     int step=0;
     while(1) {
-        printf("-- step %d : initial state: \n", step, trafficLight);
+        printf("-- step %d : initial state: \n", step, init_state);
         /* memset possible_action array */
         memset(possible_action, 0, nActions*sizeof(int));
-        get_possible_action(R, trafficLight, possible_action);
+        get_possible_action(R, init_state, possible_action);
 
         /* get next action */
         next_action = possible_action[rand()%possible_action_num];
@@ -253,18 +193,18 @@ int episode_iterator(trafficLight_t trafficLight, double Q[nActions][nTimes][nLa
         max_q = get_max_q(Q, next_action);
 
         Q_before = Q[init_state][next_action];
-        // update formula Q(s,a)=R(s,a)+alpha * max{Q(s', a')}
+        /* update formula Q(s,a)=R(s,a)+alpha * max{Q(s', a')} */
         Q[init_state][next_action] = R[init_state][next_action] + alpha * max_q;
         Q_after = Q[init_state][next_action];
 
-        // next episode rules
+        /* next episode rules
         // if next_action is destination state, then go next episode
-        // if not, then go back to this loop
+        // if not, then go back to this loop*/
         if (next_action == DES_STATE){
             init_state = rand()%STATE_NUM;
             break;
         }else{
-            // if not destination state, then next action becomes initial state
+            /* if not destination state, then next action becomes initial state*/
             init_state = next_action;
         }
         step++;
@@ -272,6 +212,35 @@ int episode_iterator(trafficLight_t trafficLight, double Q[nActions][nTimes][nLa
     return init_state;
 }
 
+int inference_best_action(int now_state, double Q[nStates][nActions]){
+    /* get the max value of Q corresponding action when state is nw_state*/
+    double temp_max_q=0;
+    int best_action=0;
+    int i;
+    for (i = 0; i < nActions; ++i) {
+        if (Q[now_state][i] > temp_max_q){
+            temp_max_q = Q[now_state][i];
+            best_action = i;
+        }
+    }
+    return best_action;
+}
+
+void run_training(int init_state) {
+    int initial_state = init_state;
+    int count = 0;
+    int i;
+    /* start random */
+    srand((unsigned)time(NULL));
+    printf("%d %s\n", count, "[INFO] start training...");
+    for (i = 0; i < MAX_EPISODE; ++i) {
+        printf("%d %s %d\n", count, "[INFO] Episode: ", i);
+        initial_state = episode_iterator(initial_state, Q, R);
+        printf("%d %s %d\n", count, "-- updated Q matrix: ");
+        /*print_matrix(Q, 6, 6);*/
+        count++;
+    }
+}
 /********************************************************************************************/
 /********************************************************************************************/
 /********************************************************************************************/
