@@ -132,8 +132,8 @@ void printVisualization(trafficLight_t *trafficLight, int i) {
     printf("========= TICK %-4d =========\n", i + 1);
     printf("       |     |     |         \n");
     printf("_______| %-4d|     |_______  \n", trafficLight->rUpDown->amountOfCars);
-    printf("                     %-4d    \n", trafficLight->rRightLeft->amountOfCars);
-    printf("-------      %s      ------- \n", (trafficLight->lightDir < 0) ? "X" : (trafficLight->lightDir == 2) ? "_" : "|");
+    printf("                    %-4d    \n",,trafficLight->rRightLeft->amountOfCars);
+    printf("-------     %s     ------- \n", (trafficLight->lightDir < 0) ? "X" : (trafficLight->lightDir == 2) ? "<->" : " | ");
     printf(" %-4d                        \n", trafficLight->rLeftRight->amountOfCars);
     printf("_______             _______  \n");
     printf("       |     | %-4d|         \n", trafficLight->rDownUp->amountOfCars);
