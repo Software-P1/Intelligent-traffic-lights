@@ -43,17 +43,17 @@ typedef struct trafficLight_s {
 
 /*States 4*3*4^4 = 3072 */
 #define nTimes 3
-/*3[1] Time since last switch: 0: 0-9; 1: 10-179; 2: 180-999+*/
+/*3[0] Time since last switch: 0: 0-9; 1: 10-179; 2: 180-999+*/
 #define nLane1 4
-/*4[2] lane 1 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+/*4[1] lane 1 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
 #define nLane2 4
-/*4[3] lane 2 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+/*4[2] lane 2 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
 #define nLane3 4
-/*4[4] lane 3 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+/*4[3] lane 3 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
 #define nLane4 4
-/*4[5] lane 4 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+/*4[4] lane 4 Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
 #define nActions 4
-/*4[0] Ligth direction: 0,1,2,3*/
+/*4[5] Ligth direction: 0,1,2,3*/ /*0: Updown; 1 LeftRight; 2 going to UpDown; 3 going to LeftRight;*/
 #define nStates 23333 /* states are 233333 */
 /*This would give us states like 103112 meaning that we are green up/down we have just changed to this states
   there are alot of cares in lane 1, few cars in lane 2 and 3 and between 4-9 cars in lane 4*/
@@ -62,64 +62,360 @@ int i, z, j, k, l, m;
 double R[nStates][nActions]; /* Reward tabel*/
 
 double Q[nStates][nActions]; /* Q tabel */
+
+double get_reward(int state, int action) {
+  int reward = 0;
+  /*3[0] Time since last switch: 0: 0-9; 1: 10-179; 2: 180-999+*/
+  switch (state) {
+    case 0       ... 999999: /*We have just changed state*/
+      if(state % 10 == action) {
+        reward += 100;
+      } else {
+        reward -= 10000;
+      }
+      break;
+    case 1000000 ... 1999999: /* We changed state some time ago*/
+      reward += 0;
+      break;
+    case 2000000 ... 2999999:
+      if(state % 10 != action) {
+        reward += 100;
+      } else {
+        reward -= 1000;
+      }
+      break;
+    default:
+      printf("Unknown time since last change\n");
+      break;
+  }
+  /*
+  int rUpDown;
+  int rDownUp;
+  int rLeftRight;
+  int rRightLeft;
+
+   */
+  /*4[1] lane rUpDown Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+  switch (state % 100000) {
+    case 0     ... 9999: /*Zero cars wating*/
+      reward += 100;
+      break;
+    case 10000 ... 19999: /* Between 1 and 3 cars waiting */
+      switch (action) {
+        case 0:
+          reward += 30;
+          break;
+        case 1:
+          reward -=10;
+          break;
+        case 2:
+          reward +=15;
+          break;
+        case 3:
+          reward -=15;
+          break;
+      }
+      break;
+    case 20000 ... 29999: /* Between 4 and 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward += 35;
+          break;
+        case 1:
+          reward -=15;
+          break;
+        case 2:
+          reward +=7;
+          break;
+        case 3:
+          reward -=20;
+          break;
+      }
+      break;
+    case 30000 ... 39999: /* More than 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward += 40;
+          break;
+        case 1:
+          reward -=20;
+          break;
+        case 2:
+          reward +=15;
+          break;
+        case 3:
+          reward -=25;
+          break;
+      }
+      break;
+    default:
+      printf("Unknown number of cars in rUpDown\n");
+      break;
+  }
+
+  /*4[2] lane rDownUp Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+  switch (state % 10000) {
+    case 0    ... 999: /*Zero cars wating*/
+      reward += 100;
+      break;
+    case 1000 ... 1999: /* Between 1 and 3 cars waiting */
+      switch (action) {
+        case 0:
+          reward += 30;
+          break;
+        case 1:
+          reward -=10;
+          break;
+        case 2:
+          reward +=15;
+          break;
+        case 3:
+          reward -=15;
+          break;
+      }
+      break;
+    case 2000 ... 2999: /* Between 4 and 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward += 35;
+          break;
+        case 1:
+          reward -=15;
+          break;
+        case 2:
+          reward +=7;
+          break;
+        case 3:
+          reward -=20;
+          break;
+      }
+      break;
+    case 3000 ... 3999: /* More than 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward += 40;
+          break;
+        case 1:
+          reward -=20;
+          break;
+        case 2:
+          reward +=15;
+          break;
+        case 3:
+          reward -=25;
+          break;
+      }
+      break;
+    default:
+      printf("Unknown number of cars in rDownUp\n");
+      break;
+  }
+
+  /*4[3] lane rLeftRight Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+  switch (state % 1000) {
+    case 0   ... 99: /*Zero cars wating*/
+      reward += 100;
+      break;
+    case 100 ... 199: /* Between 1 and 3 cars waiting */
+      switch (action) {
+        case 0:
+          reward -=10;
+          break;
+        case 1:
+          reward += 30;
+          break;
+        case 2:
+          reward -=15;
+          break;
+        case 3:
+          reward +=15;
+          break;
+      }
+      break;
+    case 200 ... 299: /* Between 4 and 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward -=15;
+          break;
+        case 1:
+          reward += 35;
+          break;
+        case 2:
+          reward -=20;
+          break;
+        case 3:
+          reward +=7;
+          break;
+      }
+      break;
+    case 300 ... 399: /* More than 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward -=20;
+          break;
+        case 1:
+          reward += 40;
+          break;
+        case 2:
+          reward -=25;
+          break;
+        case 3:
+          reward +=15;
+          break;
+      }
+      break;
+    default:
+      printf("Unknown number of cars in rLeftRight\n");
+      break;
+  }
+
+  /*4[4] lane rRightLeft Number of cars: 0: 0-0; 1:1-3; 2: 4-9; 3: 10-999+*/
+  switch (state % 100) {
+    case 0  ... 9: /*Zero cars wating*/
+      reward += 100;
+      break;
+    case 10 ... 19: /* Between 1 and 3 cars waiting */
+      switch (action) {
+        case 0:
+          reward -=10;
+          break;
+        case 1:
+          reward += 30;
+          break;
+        case 2:
+          reward -=15;
+          break;
+        case 3:
+          reward +=15;
+          break;
+      }
+      break;
+    case 20 ... 29: /* Between 4 and 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward -=15;
+          break;
+        case 1:
+          reward += 35;
+          break;
+        case 2:
+          reward -=20;
+          break;
+        case 3:
+          reward +=7;
+          break;
+      }
+      break;
+    case 30 ... 39: /* More than 9 cars waiting */
+      switch (action) {
+        case 0:
+          reward -=20;
+          break;
+        case 1:
+          reward += 40;
+          break;
+        case 2:
+          reward -=25;
+          break;
+        case 3:
+          reward +=15;
+          break;
+      }
+      break;
+    default:
+      printf("Unknown number of cars in rRightLeft\n");
+      break;
+  }
+
+  /*4[5] Ligth direction: 0,1,2,3*/ /*0: Updown; 1 LeftRight; 2 going to UpDown; 3 going to LeftRight;*/
+  switch (state % 10) {
+    case 0:
+      if(action != 0 || action != 2) {
+        reward -= 1000000;
+      }
+      break;
+      case 1:
+        if(action != 1 || action != 3) {
+          reward -= 1000000;
+        }
+        break;
+      case 2:
+        if(action != 2 || action != 0) {
+          reward -= 1000000;
+        } else if(action == 0) {
+          reward += 1000;
+        }
+        break;
+      case 3:
+        if(action != 3 || action != 1) {
+          reward -= 1000000;
+        } else if(action == 1) {
+          reward += 1000;
+        }
+        break;
+  }
+  return reward;
+}
+
 long get_state(trafficLight_t trafficLight) { /* simplyfy state to a number*/
   int cTime;
-  int lane1;
-  int lane2;
-  int lane3;
-  int lane4;
+  int rLeftRight;
+  int rRightLeft;
+  int rUpDown;
+  int rDownUp;
+  int tafficDirection;
   int state;
 
   switch (trafficLight.rLeftRight->amountOfCars) {
     case 0:
-      lane1 = 0;
+      rLeftRight = 0;
       break;
     case 1 ... 3:
-      lane1 = 1;
+      rLeftRight = 1;
       break;
     case 4 ... 9:
-      lane1 = 2;
+      rLeftRight = 2;
     default:
-      lane1 = 3;
+      rLeftRight = 3;
       break;
   }
   switch (trafficLight.rRightLeft->amountOfCars) {
     case 0:
-      lane2 = 0;
+      rRightLeft = 0;
       break;
     case 1 ... 3:
-      lane2 = 1;
+      rRightLeft = 1;
       break;
     case 4 ... 9:
-      lane2 = 2;
+      rRightLeft = 2;
     default:
-      lane2 = 3;
+      rRightLeft = 3;
       break;
   }
   switch (trafficLight.rUpDown->amountOfCars) {
     case 0:
-      lane3 = 0;
+      rUpDown = 0;
       break;
     case 1 ... 3:
-      lane3 = 1;
+      rUpDown = 1;
       break;
     case 4 ... 9:
-      lane3 = 2;
+      rUpDown = 2;
     default:
-      lane3 = 3;
+      rUpDown = 3;
       break;
   }
   switch (trafficLight.rDownUp->amountOfCars) {
     case 0:
-      lane4 = 0;
+      rDownUp = 0;
       break;
     case 1 ... 3:
-      lane4 = 1;
+      rDownUp = 1;
       break;
     case 4 ... 9:
-      lane4 = 2;
+      rDownUp = 2;
     default:
-      lane4 = 3;
+      rDownUp = 3;
       break;
   }
   switch (trafficLight.timer) {
@@ -133,14 +429,29 @@ long get_state(trafficLight_t trafficLight) { /* simplyfy state to a number*/
       cTime = 2;
       break;
   }
+  switch (trafficLight.bVertical) {
+    case 1: /*UpDown*/
+      tafficDirection = 0;
+      break;
+    case 2: /* LeftRight*/
+      tafficDirection = 1;
+      break;
+    case -1: /*Yellow Going to UpDown*/
+      tafficDirection = 2;
+      break;
+    case -2: /*Yellow  Going to LeftRight*/
+      tafficDirection = 3;
+      break;
 
+  }
   /*Move numbers*/
-  cTime *= 10000;
-  lane1 *= 1000;
-  lane2 *= 100;
-  lane3 *= 10;
-  lane4;
-  state = cTime + lane1 + lane2 + lane3 + lane4;
+  cTime       *= 100000;
+  rUpDown     *= 10000;
+  rDownUp     *= 1000;
+  rLeftRight  *= 100;
+  rRightLeft  *= 10;
+  tafficDirection;
+  state = cTime + rUpDown + rDownUp + rLeftRight + rRightLeft + tafficDirection;
   /*nTime nLane1 nLane2 nLane3 nLane4 */
   return state;
 }
@@ -180,35 +491,32 @@ int episode_iterator(int init_state, double Q[nStates][nActions], double R[nStat
 
     /* start series event loop */
     int step=0;
-    while(1) {
-        printf("-- step %d : initial state: \n", step, init_state);
-        /* memset possible_action array */
-        memset(possible_action, 0, nActions*sizeof(int));
-        get_possible_action(R, init_state, possible_action);
+    printf("-- step %d : initial state: \n", step, init_state);
+    /* memset possible_action array */
+    memset(possible_action, 0, nActions*sizeof(int));
+    get_possible_action(R, init_state, possible_action);
 
-        /* get next action */
-        next_action = possible_action[rand()%possible_action_num];
-        printf("-- step %d : next action: \n", step, next_action);
-        /* treat next action as state, and we can get max{Q(s', a')} */
-        max_q = get_max_q(Q, next_action);
+    /* get next action */
+    next_action = possible_action[rand()%possible_action_num];
+    printf("-- step %d : next action: \n", step, next_action);
+    /* treat next action as state, and we can get max{Q(s', a')} */
+    max_q = get_max_q(Q, next_action);
 
-        Q_before = Q[init_state][next_action];
-        /* update formula Q(s,a)=R(s,a)+alpha * max{Q(s', a')} */
-        Q[init_state][next_action] = R[init_state][next_action] + alpha * max_q;
-        Q_after = Q[init_state][next_action];
+    Q_before = Q[init_state][next_action];
+    /* update formula Q(s,a)=R(s,a)+alpha * max{Q(s', a')} */
+    Q[init_state][next_action] = R[init_state][next_action] + alpha * max_q;
+    Q_after = Q[init_state][next_action];
 
-        /* next episode rules
-        // if next_action is destination state, then go next episode
-        // if not, then go back to this loop*/
-        if (next_action == DES_STATE){
-            init_state = rand()%STATE_NUM;
-            break;
-        }else{
-            /* if not destination state, then next action becomes initial state*/
-            init_state = next_action;
-        }
-        step++;
-    }
+    /* next episode rules
+    // if next_action is destination state, then go next episode
+    // if not, then go back to this loop*/
+    /*if (next_action == DES_STATE){
+        init_state = rand()%STATE_NUM;
+        break;
+    }else{*/
+        /* if not destination state, then next action becomes initial state*/
+    init_state = next_action;
+    /*}*/
     return init_state;
 }
 
@@ -226,6 +534,17 @@ int inference_best_action(int now_state, double Q[nStates][nActions]){
     return best_action;
 }
 
+void print_matrix(double m[nStates][nActions]) {
+    int i, j;
+    for (i = 0; i < nStates; ++i) {
+        for (j = 0; j < nActions; ++j) {
+            printf("%d\t", m[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+
 void run_training(int init_state) {
     int initial_state = init_state;
     int count = 0;
@@ -237,7 +556,7 @@ void run_training(int init_state) {
         printf("%d %s %d\n", count, "[INFO] Episode: ", i);
         initial_state = episode_iterator(initial_state, Q, R);
         printf("%d %s %d\n", count, "-- updated Q matrix: ");
-        /*print_matrix(Q, 6, 6);*/
+        print_matrix(Q);
         count++;
     }
 }
@@ -270,29 +589,19 @@ int main(void) {
     /* Seed randomization */
     srand(SEED);
 
-      /*TODO move this to a better place*/
-    for(z = 0; z < nActions; z++) {
-      for(j = 0; j < nTimes; j++) {
-        for(k = 0; k < nLane1; k++) {
-          for(l = 0; l < nLane2; l++) {
-            for(m = 0; m < nLane3; m++) {
-              memset(R[z][j][k][l][m], 0, nActions*sizeof(double));
-              memset(Q[z][j][k][l][m], 0, nActions*sizeof(double));
-            }
-          }
-        }
-      }
-    }
-
-
-
-
-
-
-
     /* Fill traffic light & initialize direction */
     fillTrafficLight(&trafficLight, &rLeftRight, &rRightLeft, &rUpDown, &rDownUp);
     trafficLight.bVertical = 1;
+
+    /*TODO move this to a better place*/
+    for (i = 0; i < nStates; i++) {
+      /* code */
+      memset(R[i], 0, nActions*sizeof(double));
+      memset(Q[i], 0, nActions*sizeof(double));
+    }
+
+
+    run_training(get_state(trafficLight));
 
     /* Ask user for input */
     do {
