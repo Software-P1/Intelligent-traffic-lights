@@ -11,11 +11,14 @@ typedef struct road_s {
     int amountOfCars;
     int waitTime;
     int waitTimeAccumulated;
+    int totalCars;
+    int totalWait;
 } road_t;
 
 /* Struct for the traffic light */
 typedef struct trafficLight_s {
     int lightDir;
+    int totalCars;
     road_t *rLeftRight;
     road_t *rRightLeft;
     road_t *rUpDown;
@@ -31,6 +34,7 @@ void removeCarsIndividual(int *amountRoad1, int *amountRoad2);
 void trafficLightLogic(trafficLight_t *trafficLight, int *timer);
 void spawnCars(trafficLight_t *trafficLight, double spawnFactor);
 int randomIndividualSpawn(road_t *road, double chance);
+void printFirstCsvLine(FILE *dataFile);
 void printCsv(trafficLight_t *trafficLight, int seconds, int totalWait, FILE *file);
 void waitTimeLogic(trafficLight_t *trafficLight, int *totalWait);
 void accumilateWaitTime (road_t *zRoad1, road_t *zRoad2, road_t *aRoad3, road_t *aRoad4, int bNull);
@@ -45,6 +49,7 @@ int main(void) {
     /* Create and open file for data saving */
     FILE *dataFile;
     dataFile = fopen(CAR_DATA_FILE, "w");
+    printFirstCsvLine(dataFile);
 
     /* Seed randomization */
     srand(SEED);
@@ -97,33 +102,76 @@ int main(void) {
 /* Fill the traffic light with information */
 void fillTrafficLight(trafficLight_t *trafficLightToBeFilled, road_t *rLeftRight,
                       road_t *rRightLeft, road_t *rUpDown, road_t *rDownUp) {
+    int i = 0;
+    road_t *roads[4];
+
+    roads[0] = rLeftRight;
+    roads[1] = rRightLeft;
+    roads[2] = rUpDown;
+    roads[3] = rDownUp;
+
     trafficLightToBeFilled->rLeftRight = rLeftRight;
     trafficLightToBeFilled->rRightLeft = rRightLeft;
     trafficLightToBeFilled->rUpDown = rUpDown;
     trafficLightToBeFilled->rDownUp = rDownUp;
+    trafficLightToBeFilled->totalCars = 0;
 
     /* Set variables to 0 prior to use */
-    trafficLightToBeFilled->rLeftRight->amountOfCars = 0;
-    trafficLightToBeFilled->rRightLeft->amountOfCars = 0;
-    trafficLightToBeFilled->rUpDown->amountOfCars = 0;
-    trafficLightToBeFilled->rDownUp->amountOfCars = 0;
-
-    trafficLightToBeFilled->rLeftRight->waitTime = 0;
-    trafficLightToBeFilled->rRightLeft->waitTime = 0;
-    trafficLightToBeFilled->rUpDown->waitTime = 0;
-    trafficLightToBeFilled->rDownUp->waitTime = 0;
+    for (i = 0; i < 4; i++) {
+         roads[i]->amountOfCars = 0;
+         roads[i]->waitTime = 0;
+         roads[i]->totalWait = 0;
+         roads[i]->totalCars = 0;
+         roads[i]->waitTimeAccumulated = 0;
+    }
     return;
 }
 
+/* Print first data line of the csv */
+void printFirstCsvLine(FILE *dataFile){
+    /* Write description into first line of carData file */
+    fprintf(dataFile,"%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n"
+    , "Tick"
+    , "Amount rUpDown"
+    , "Amount rDownUp"
+    , "Amount rRightLeft"
+    , "Amount rLeftRight"
+    , "Total wait (Total)"
+    , "Total wait (rUpDown)"
+    , "Total wait (rDownUp)"
+    , "Total wait (rRightLeft)"
+    , "Total wait (rLeftRight)"
+    , "Total cars (Total)"
+    , "Total cars (rUpDown)"
+    , "Total cars (rDownUp)"
+    , "Total cars (rRightLeft)"
+    , "Total cars (rLeftRight)"
+    , "Average wait time"
+    , "Average cars pr. road");
+    return;
+}
+
+
 /* Creates a .csv that saves how many cars are in each direction and total wait time */
 void printCsv(trafficLight_t *trafficLight, int seconds, int totalWait, FILE *file) {
-    fprintf(file,"%d;%d;%d;%d;%d;%d\n"
+    fprintf(file,"%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%f;%f\n"
             , seconds
             , trafficLight->rUpDown->amountOfCars
             , trafficLight->rDownUp->amountOfCars
             , trafficLight->rRightLeft->amountOfCars
             , trafficLight->rLeftRight->amountOfCars
-            , totalWait);
+            , totalWait
+            , trafficLight->rUpDown->totalWait
+            , trafficLight->rDownUp->totalWait
+            , trafficLight->rRightLeft->totalWait
+            , trafficLight->rLeftRight->totalWait
+            , trafficLight->totalCars
+            , trafficLight->rUpDown->totalCars
+            , trafficLight->rDownUp->totalCars
+            , trafficLight->rRightLeft->totalCars
+            , trafficLight->rLeftRight->totalCars
+            , (totalWait > 0) ? ((float)(totalWait) / (float)(trafficLight->totalCars)) : 0
+            , (float)(trafficLight->totalCars) / 4);
     return;
 }
 
@@ -255,16 +303,20 @@ void spawnCars(trafficLight_t *trafficLight, double spawnFactor) {
     /* 3 % chance of spawn on rLeftRight & rRightLeft */
     if (randomIndividualSpawn(trafficLight->rLeftRight, (30 * spawnFactor)) && PRINT_MSG == 1){
         printf("[Car spawn rLeftRight]\n");
+        trafficLight->totalCars += 1;
     }
     if (randomIndividualSpawn(trafficLight->rRightLeft, (30 * spawnFactor)) && PRINT_MSG == 1){
         printf("[Car spawn rRightLeft]\n");
+        trafficLight->totalCars += 1;
     }
     /* 4,5 % chance of spawn on rUpDown & rDownUp */
     if (randomIndividualSpawn(trafficLight->rUpDown, (45 * spawnFactor)) && PRINT_MSG == 1){
         printf("[Car spawn rUpDown]\n");
+        trafficLight->totalCars += 1;
     }
     if (randomIndividualSpawn(trafficLight->rDownUp, (45 * spawnFactor)) && PRINT_MSG == 1){
         printf("[Car spawn rDownUp]\n");
+        trafficLight->totalCars += 1;
     }
     return;
 }
@@ -285,6 +337,7 @@ int randomIndividualSpawn(road_t *road, double chance){
     /* If the chance is less then add a car */
     if (randomNumber <= chance){
         road->amountOfCars += 1;
+        road->totalCars += 1;
         return 1;
     }
     return 0;
@@ -296,10 +349,12 @@ void waitTimeLogic(trafficLight_t *trafficLight, int *totalWait){
     if (trafficLight->lightDir == 1) {
         accumilateWaitTime(trafficLight->rUpDown, trafficLight->rDownUp, trafficLight->rLeftRight, trafficLight->rRightLeft, 0);
     }
-      /* waitTime logic for horisontal direction */
+    /* waitTime logic for horisontal direction */
     else if (trafficLight->lightDir == 2) {
         accumilateWaitTime(trafficLight->rLeftRight, trafficLight->rRightLeft, trafficLight->rUpDown, trafficLight->rDownUp, 0);
-    } else if (trafficLight->lightDir == -1 || trafficLight->lightDir == -2) {
+    }
+    /* Yellow lights (only nulls everything) */
+    else if (trafficLight->lightDir == -1 || trafficLight->lightDir == -2) {
         accumilateWaitTime(trafficLight->rUpDown, trafficLight->rDownUp, trafficLight->rLeftRight, trafficLight->rRightLeft, 1);
         accumilateWaitTime(trafficLight->rLeftRight, trafficLight->rRightLeft, trafficLight->rUpDown, trafficLight->rDownUp, 1);
     } else {
@@ -330,5 +385,7 @@ void accumilateWaitTime (road_t *zRoad1, road_t *zRoad2, road_t *aRoad3, road_t 
     aRoad4->waitTime += aRoad4->amountOfCars;
     aRoad3->waitTimeAccumulated += 1;
     aRoad4->waitTimeAccumulated += 1;
+    aRoad3->totalWait += 1;
+    aRoad4->totalWait += 1;
     return;
 }
