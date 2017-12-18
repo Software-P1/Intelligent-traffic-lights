@@ -134,7 +134,7 @@ void fillTrafficLight(trafficLight_t *trafficLightToBeFilled, road_t *rLeftRight
 }
 
 /* Print first data line of the csv */
-void printFirstCsvLine(FILE *dataFile){
+void printFirstCsvLine(FILE *dataFile) {
     /* Write description of each value into first line of carData file */
     fprintf(dataFile,"%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n"
     , "Tick"
@@ -202,7 +202,7 @@ void removeCars(trafficLight_t *trafficLight, int *timeUntilRemove) {
 
     /* Print when removing cars */
     if (PRINT_MSG == 1) {
-        if (trafficLight->lightDir == 1 || trafficLight->lightDir == 2){
+        if (trafficLight->lightDir == 1 || trafficLight->lightDir == 2) {
             printf("[Cars removed on %s direction]\n", (trafficLight->lightDir == 1) ? "vertical" : "horisontal" );
         }
     }
@@ -210,7 +210,7 @@ void removeCars(trafficLight_t *trafficLight, int *timeUntilRemove) {
     /* Remove cars based on lightDir */
     if (trafficLight->lightDir == 1) {
         removeCarsIndividual(&trafficLight->rUpDown->amountOfCars, &trafficLight->rDownUp->amountOfCars);
-    } else if (trafficLight->lightDir == 2){
+    } else if (trafficLight->lightDir == 2) {
         removeCarsIndividual(&trafficLight->rRightLeft->amountOfCars, &trafficLight->rLeftRight->amountOfCars);
     } else if (trafficLight->lightDir == -1 || trafficLight->lightDir == -2) {
         /* Do nothing if yellow */
@@ -255,7 +255,7 @@ void removeCars(trafficLight_t *trafficLight, int *timeUntilRemove) {
 }
 
 /* Removes cars on two roads if they are above 1 car */
-void removeCarsIndividual(int *amountRoad1, int *amountRoad2){
+void removeCarsIndividual(int *amountRoad1, int *amountRoad2) {
     if (*amountRoad1 > 0) {
         *amountRoad1 -= 1;
     }
@@ -307,21 +307,21 @@ void spawnCars(trafficLight_t *trafficLight, double spawnFactor) {
     }
 
     /* 3 % chance of spawn on rLeftRight & rRightLeft */
-    if (randomIndividualSpawn(trafficLight->rLeftRight, (30 * spawnFactor)) && PRINT_MSG == 1){
+    if (randomIndividualSpawn(trafficLight->rLeftRight, (30 * spawnFactor)) && PRINT_MSG == 1) {
         printf("[Car spawn rLeftRight]\n");
         trafficLight->totalCars += 1;
     }
-    if (randomIndividualSpawn(trafficLight->rRightLeft, (30 * spawnFactor)) && PRINT_MSG == 1){
+    if (randomIndividualSpawn(trafficLight->rRightLeft, (30 * spawnFactor)) && PRINT_MSG == 1) {
         printf("[Car spawn rRightLeft]\n");
         trafficLight->totalCars += 1;
     }
 
     /* 4,5 % chance of spawn on rUpDown & rDownUp */
-    if (randomIndividualSpawn(trafficLight->rUpDown, (45 * spawnFactor)) && PRINT_MSG == 1){
+    if (randomIndividualSpawn(trafficLight->rUpDown, (45 * spawnFactor)) && PRINT_MSG == 1) {
         printf("[Car spawn rUpDown]\n");
         trafficLight->totalCars += 1;
     }
-    if (randomIndividualSpawn(trafficLight->rDownUp, (45 * spawnFactor)) && PRINT_MSG == 1){
+    if (randomIndividualSpawn(trafficLight->rDownUp, (45 * spawnFactor)) && PRINT_MSG == 1) {
         printf("[Car spawn rDownUp]\n");
         trafficLight->totalCars += 1;
     }
@@ -330,7 +330,7 @@ void spawnCars(trafficLight_t *trafficLight, double spawnFactor) {
 
 /* Spawn car on individual road, based on chance (100 and 1 decimal in whole numbers) */
 /* Returns 1 if sucsessfull and 0 if not*/
-int randomIndividualSpawn(road_t *road, double chance){
+int randomIndividualSpawn(road_t *road, double chance) {
     double randomNumber = 0;
     randomNumber = (double)(rand() % 1000);
 
@@ -341,7 +341,7 @@ int randomIndividualSpawn(road_t *road, double chance){
     }
 
     /* If the chance is less then add a car */
-    if (randomNumber <= chance){
+    if (randomNumber <= chance) {
         road->amountOfCars += 1;
         road->totalCars += 1;
         return 1;
@@ -350,7 +350,7 @@ int randomIndividualSpawn(road_t *road, double chance){
 }
 
 /* Logic for the waitTime */
-void waitTimeLogic(trafficLight_t *trafficLight){
+void waitTimeLogic(trafficLight_t *trafficLight) {
     /* waitTime logic for vertical direction */
     if (trafficLight->lightDir == 1) {
         accumilateWaitTime(trafficLight->rUpDown, trafficLight->rDownUp, trafficLight->rLeftRight, trafficLight->rRightLeft, 0);
