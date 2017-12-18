@@ -161,7 +161,7 @@ void printFirstCsvLine(FILE *dataFile){
 /* Creates a .csv that saves how many cars are in each direction and total wait time */
 void printCsv(trafficLight_t *trafficLight, int tick, FILE *file) {
     fprintf(file,"%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%f;%f\n"
-            , seconds
+            , tick
             , trafficLight->rUpDown->amountOfCars
             , trafficLight->rDownUp->amountOfCars
             , trafficLight->rRightLeft->amountOfCars
@@ -331,13 +331,12 @@ void spawnCars(trafficLight_t *trafficLight, double spawnFactor) {
 /* Spawn car on individual road, based on chance (100 and 1 decimal in whole numbers) */
 /* Returns 1 if sucsessfull and 0 if not*/
 int randomIndividualSpawn(road_t *road, double chance){
-    double randomNumber = 0, dChance = 0;
+    double randomNumber = 0;
     randomNumber = (double)(rand() % 1000);
 
     /* Error correct chance */
-    dChance = chance;
-    if (dChance < 0) {
-        dChance = 0;
+    if (chance < 0) {
+        chance = 0;
         printf("ERROR! Negative chance has been error corrected to 0!\n");
     }
 
