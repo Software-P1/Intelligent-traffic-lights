@@ -38,7 +38,7 @@ void trafficLightLogic(trafficLight_t *trafficLight, int *timer);
 void spawnCars(trafficLight_t *trafficLight, double spawnFactor);
 int randomIndividualSpawn(road_t *road, double chance);
 void printFirstCsvLine(FILE *dataFile);
-void printCsv(trafficLight_t *trafficLight, int seconds, FILE *file);
+void printCsv(trafficLight_t *trafficLight, int tick, FILE *file);
 void waitTimeLogic(trafficLight_t *trafficLight);
 void accumilateWaitTime (road_t *zRoad1, road_t *zRoad2, road_t *aRoad3, road_t *aRoad4, int bNull);
 
@@ -159,7 +159,7 @@ void printFirstCsvLine(FILE *dataFile){
 
 
 /* Creates a .csv that saves how many cars are in each direction and total wait time */
-void printCsv(trafficLight_t *trafficLight, int seconds, FILE *file) {
+void printCsv(trafficLight_t *trafficLight, int tick, FILE *file) {
     fprintf(file,"%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%f;%f\n"
             , seconds
             , trafficLight->rUpDown->amountOfCars
