@@ -3,12 +3,20 @@
 /* youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi */
 /* And this video: youtube.com/watch?v=ILsA4nyG7I0 */
 
+/* ========================================================================== */
+/* ========================================================================== */
+/* PLEASE NOTE:                                                               */
+/* WE ONLY MANAGED TO GET FORWARD PROPERGATION TO WORK, BUT NOT               */
+/* BACKWARDSPROPAGATION (THE PART TEACHING THE NEURAL NETWORK)                */
+/* ========================================================================== */
+/* ========================================================================== */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 /* General simulation defines */
-#define SEED 123
+#define SEED 1234
 #define AMOUNT_OF_CARS_PASS_PER_TICK 3
 #define PERCENT_3_CAR_SPAWN 3
 #define PERCENT_2_CAR_SPAWN 4
@@ -86,7 +94,7 @@ int main(void) {
     trafficLight.bVertical = 0;
 
     /* Fill & save the neural network */
-    fillNeuralNetwork(&theNeuralNetwork, 1);
+    fillNeuralNetwork(&theNeuralNetwork, 0);
     saveNeuralNetwork(&theNeuralNetwork);
 
     /* Ask user for input */
@@ -212,22 +220,6 @@ void removeCars(road_t* road1, road_t* road2){
 /* Traffic light logic */
 void trafficLightLogic(trafficLight_t* trafficLight, neuralNetwork_t* theNeuralNetwork){
     trafficLight->bVertical = runNeuralNetwork(theNeuralNetwork, trafficLight);
-
-    printf("Neural %d\n", trafficLight->bVertical);
-    /*
-    THINGS TO LOOK INTO:
-    Maybe having weights in each direction, removing less and less each time?
-    "Self organized maps"
-    "Gradiant decend"
-    "Cost function"
-    "Neural network"
-    Having different times different traffic loads?
-    Maybe having ozolation?
-    print a .csv file with outcome?
-    "Back probagation with gradiant decend"
-    "Generic algoritims?"
-    Most likely "ANN" - find youtube video from "3blue1brown"
-    */
     return;
 }
 
@@ -296,7 +288,7 @@ double randomDecimal(){
 void sigmoid(double* x){
     double euler = 0;
     euler = EULER;
-    *x = 1/(1+(pow(euler,(-*x))));
+    *x = pow(euler, *x) / (pow(euler, *x) + 1);
     return;
 }
 
