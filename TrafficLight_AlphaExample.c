@@ -157,7 +157,6 @@ void printFirstCsvLine(FILE *dataFile) {
     return;
 }
 
-
 /* Creates a .csv that saves how many cars are in each direction and total wait time */
 void printCsv(trafficLight_t *trafficLight, int tick, FILE *file) {
     fprintf(file,"%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%f;%f\n"
