@@ -202,7 +202,7 @@ void removeCars(trafficLight_t *trafficLight, int *timeUntilRemove) {
     /* Print when removing cars */
     if (PRINT_MSG == 1) {
         if (trafficLight->lightDir == 1 || trafficLight->lightDir == 2) {
-            printf("[Cars removed on %s direction]\n", (trafficLight->lightDir == 1) ? "vertical" : "horisontal" );
+            printf("[Cars removed on %s direction]\n", (trafficLight->lightDir == 1) ? "vertical" : "horisontal");
         }
     }
 
@@ -221,31 +221,31 @@ void removeCars(trafficLight_t *trafficLight, int *timeUntilRemove) {
     randomNumber = rand() % 100;
 
     /* 5% chance of 8 sec */
-    if (randomNumber <= 5) {
+    if (randomNumber < 5) {
         *timeUntilRemove = 8;
     }
     /* 15% chance of 7 sec */
-    else if (randomNumber <= 20 && randomNumber > 5) {
+    else if (randomNumber < 20 && randomNumber >= 5) {
         *timeUntilRemove = 7;
     }
     /* 40% chance of 6 sec */
-    else if (randomNumber <= 60 && randomNumber > 20) {
+    else if (randomNumber < 60 && randomNumber >= 20) {
         *timeUntilRemove = 6;
     }
     /* 15% chance of 5 sec */
-    else if (randomNumber <= 75 && randomNumber > 60) {
+    else if (randomNumber < 75 && randomNumber >= 60) {
         *timeUntilRemove = 5;
     }
     /* 10% chance of 4 sec */
-    else if (randomNumber <= 85 && randomNumber > 75) {
+    else if (randomNumber < 85 && randomNumber >= 75) {
         *timeUntilRemove = 4;
     }
     /* 10% chance of 3 sec */
-    else if (randomNumber <= 95 && randomNumber > 85) {
+    else if (randomNumber < 95 && randomNumber >= 85) {
         *timeUntilRemove = 3;
     }
     /* 5% chance of 2 sec*/
-    else if (randomNumber <= 100 && randomNumber > 95) {
+    else if (randomNumber < 100 && randomNumber >= 95) {
         *timeUntilRemove = 2;
     } else {
         printf("ERROR in remove cars\n");
@@ -306,22 +306,30 @@ void spawnCars(trafficLight_t *trafficLight, double spawnFactor) {
     }
 
     /* 3 % chance of spawn on rLeftRight & rRightLeft */
-    if (randomIndividualSpawn(trafficLight->rLeftRight, (30 * spawnFactor)) && PRINT_MSG == 1) {
-        printf("[Car spawn rLeftRight]\n");
+    if (randomIndividualSpawn(trafficLight->rLeftRight, (30 * spawnFactor))) {
+        if (PRINT_MSG == 1) {
+            printf("[Car spawn rLeftRight]\n");   /* NOTE: We changed this durring the preperation to the exam */
+        }
         trafficLight->totalCars += 1;
     }
-    if (randomIndividualSpawn(trafficLight->rRightLeft, (30 * spawnFactor)) && PRINT_MSG == 1) {
-        printf("[Car spawn rRightLeft]\n");
+    if (randomIndividualSpawn(trafficLight->rRightLeft, (30 * spawnFactor))) {
+        if (PRINT_MSG == 1) {
+            printf("[Car spawn rRightLeft]\n");
+        }
         trafficLight->totalCars += 1;
     }
 
     /* 4,5 % chance of spawn on rUpDown & rDownUp */
-    if (randomIndividualSpawn(trafficLight->rUpDown, (45 * spawnFactor)) && PRINT_MSG == 1) {
-        printf("[Car spawn rUpDown]\n");
+    if (randomIndividualSpawn(trafficLight->rUpDown, (45 * spawnFactor))) {
+        if (PRINT_MSG == 1) {
+            printf("[Car spawn rUpDown]\n");
+        }
         trafficLight->totalCars += 1;
     }
-    if (randomIndividualSpawn(trafficLight->rDownUp, (45 * spawnFactor)) && PRINT_MSG == 1) {
-        printf("[Car spawn rDownUp]\n");
+    if (randomIndividualSpawn(trafficLight->rDownUp, (45 * spawnFactor))) {
+        if (PRINT_MSG == 1) {
+            printf("[Car spawn rDownUp]\n");
+        }
         trafficLight->totalCars += 1;
     }
     return;
